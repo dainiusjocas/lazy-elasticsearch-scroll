@@ -1,0 +1,15 @@
+name: clj-kondo linting
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: adriffaud/lint-clojure@v1
+        with:
+          path: ./src
+          
