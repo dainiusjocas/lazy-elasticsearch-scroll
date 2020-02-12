@@ -8,7 +8,7 @@
 (deftest ^:integration basic-scroll
   (let [es-host (or (System/getenv "ES_HOST") "http://localhost:9200")
         index-name "scroll-test-index"
-        number-of-docs 50
+        number-of-docs (+ 10 (rand-int 50))
         records (map (fn [x] {:_id x
                               :_source {:value x}}) (range number-of-docs))]
     (log/infof "Deleted index='%s' at '%s': %s"
@@ -53,6 +53,13 @@
 
         (is (<= number-of-docs (count (scroll/hits {:es-host es-host}))))))
 
+    (testing "if query limits the number of items returned"
+      (let [num-of-docs (rand-int number-of-docs)]
+        (is (= num-of-docs (count (scroll/hits
+                         {:es-host    es-host
+                          :index-name index-name
+                          :query      {:query {:terms {:value (range num-of-docs)}}}}))))))
+
     (testing "resuming scroll with search_after is not possible"
       (let [query {:sort ["_doc"]}
             records (scroll/hits
@@ -78,17 +85,16 @@
                   :index-name index-name
                   :opts       {:size 0}})))))
 
-    ; TODO: test if search works (terms search with a couple of numbers)
-
-    ;(testing "laziness: take 5 records sleep till scroll id expires; try to take all after sleep not fail in that"
-    ;  (let [records (scroll/records
-    ;                  {:es-host    es-host
-    ;                   :index-name index-name
-    ;                   :opts       {:size         1
-    ;                                :keep-context "1s"}})]
-    ;    (is (= 5 (count (take 5 records))))
-    ;    (Thread/sleep 60000)
-    ;    (is (= 5 (count records)))))
+    (testing "laziness: take 5 records sleep till scroll id expires; try to take all after sleep not fail in that"
+      (let [records (scroll/hits
+                      {:es-host    es-host
+                       :index-name index-name
+                       :opts       {:size         1
+                                    :keep-context "1s"}})]
+        (is (= 5 (count (take 5 records))))
+        ; long sleep for scroll-id to expire
+        (Thread/sleep 60000)
+        (is (= 5 (count records)))))
 
     (testing "various incomplete inputs"
       (try
