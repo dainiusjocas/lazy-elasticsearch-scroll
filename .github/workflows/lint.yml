@@ -12,4 +12,3 @@ jobs:
       - uses: adriffaud/lint-clojure@v1
         with:
           path: ./src
-          
