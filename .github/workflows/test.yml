@@ -39,10 +39,10 @@ jobs:
         # Set N number of parallel jobs you want to run tests on.
         # Use higher number if you have slow tests to split them on more parallel jobs.
         # Remember to update ci_node_index below to 0..N-1
-        ci_node_total: [1]
+        ci_node_total: [2]
         # set N-1 indexes for parallel jobs
         # When you run 2 parallel jobs then first job will have index 0, the second job will have index 1 etc
-        ci_node_index: [0]
+        ci_node_index: [0, 1]
         elasticsearch: ["elasticsearch:7.5.2", "elasticsearch:7.6.0"]
     services:
       elasticsearch:
@@ -70,7 +70,7 @@ jobs:
         with:
           tools-deps: 1.10.1.469
 
-      - name: Interation Tests
+      - name: Integration Tests
         env:
           ES_HOST: http://localhost:${{ job.services.elasticsearch.ports[9200] }}
         run: |
