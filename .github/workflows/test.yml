@@ -33,12 +33,6 @@ jobs:
   integration-test:
     name: Integration Tests
     runs-on: ubuntu-latest
-    services:
-      elasticsearch:
-        image: elasticsearch:7.6.0
-        ports:
-          - 9200/tcp
-        options: -e="discovery.type=single-node" --health-cmd="curl http://localhost:9200/_cluster/health" --health-interval=10s --health-timeout=5s --health-retries=10
     strategy:
       fail-fast: false
       matrix:
@@ -49,6 +43,13 @@ jobs:
         # set N-1 indexes for parallel jobs
         # When you run 2 parallel jobs then first job will have index 0, the second job will have index 1 etc
         ci_node_index: [0]
+        elasticsearch: [elasticsearch:7.5.2 elasticsearch:7.6.0]
+    services:
+      elasticsearch:
+        image: ${{ matrix.elasticsearch }}
+        ports:
+          - 9200/tcp
+        options: -e="discovery.type=single-node" --health-cmd="curl http://localhost:9200/_cluster/health" --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - uses: actions/checkout@v1
 
