@@ -10,7 +10,7 @@ Clojure library to use the Elasticsearch Scroll API as a lazy sequence.
 If you're using `deps.edn` then:
 ```clojure
 {:deps {lazy-elasticsearch-scroll {:git/url "https://github.com/dainiusjocas/lazy-elasticsearch-scroll.git"
-                                   :sha "90404945073ea6223ac7121878d19b45081b481e"}}}
+                                   :sha "b8a01341cfac4747274e3b49a169d3e54d1f1dfa"}}}
 ```
 
 ## Quickstart
