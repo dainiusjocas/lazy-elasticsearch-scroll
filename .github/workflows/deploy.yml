@@ -24,6 +24,8 @@ jobs:
 
       - name: Publish to Clojars
         run: |
+          git config user.email "dainius.jocas@gmail.com"
+          git config user.name "Dainius Jocas"
           mvn --batch-mode -s clojars-settings.xml \
             -Dtag=lazy-elasticsearch-scroll-1.0.0 release:prepare \
             -DreleaseVersion=1.0.0 \
