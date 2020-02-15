@@ -2,8 +2,8 @@ name: Deploy to clojars
 
 on:
   release:
-    branches:
-      - master
+    types:
+      - created
 
 jobs:
   deploy-to-clojars:
