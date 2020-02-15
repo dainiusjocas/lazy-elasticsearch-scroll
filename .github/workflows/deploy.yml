@@ -1,9 +1,6 @@
 name: Deploy to clojars
 
-on:
-  release:
-    types:
-      - created
+on: [release]
 
 jobs:
   deploy-to-clojars:
