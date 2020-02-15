@@ -1,8 +1,9 @@
 name: Deploy to clojars
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - lazy-elasticsearch-scroll-*
 
 jobs:
   deploy-to-clojars:
