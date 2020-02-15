@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>lt.jocas</groupId>
   <artifactId>lazy-elasticsearch-scroll</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2</version>
   <name>lazy-elasticsearch-scroll</name>
   <description>Stream search library</description>
   <url>https://github.com/dainiusjocas/lazy-elasticsearch-scroll</url>
@@ -70,7 +70,7 @@
   <scm>
     <connection>scm:git:git://github.com/dainiusjocas/lazy-elasticsearch-scroll.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/dainiusjocas/lazy-elasticsearch-scroll.git</developerConnection>
-    <tag>master</tag>
+    <tag>lazy-elasticsearch-scroll-1.0.2</tag>
     <url>https://github.com/dainiusjocas/lazy-elasticsearch-scroll</url>
   </scm>
 
