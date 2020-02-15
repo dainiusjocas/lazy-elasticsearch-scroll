@@ -24,11 +24,11 @@ jobs:
 
       - name: Publish to Clojars
         run: |
-        mvn --batch-mode -s clojars-settings.xml \
-          -Dtag=lazy-elasticsearch-scroll-1.0.0 release:prepare \
-          -DreleaseVersion=1.0.0 \
-          -DdevelopmentVersion=2.0.0-SNAPSHOT
-        mvn --batch-mode -s clojars-settings.xml release:perform
+          mvn --batch-mode -s clojars-settings.xml \
+            -Dtag=lazy-elasticsearch-scroll-1.0.0 release:prepare \
+            -DreleaseVersion=1.0.0 \
+            -DdevelopmentVersion=2.0.0-SNAPSHOT
+          mvn --batch-mode -s clojars-settings.xml release:perform
         env:
           CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
           CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
