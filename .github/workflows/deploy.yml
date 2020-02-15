@@ -24,3 +24,6 @@ jobs:
 
       - name: Publish to Clojars
         run: mvn deploy -s clojars-settings.xml
+        env:
+          CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
