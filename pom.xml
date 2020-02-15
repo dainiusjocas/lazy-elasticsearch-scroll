@@ -70,7 +70,7 @@
   <scm>
     <connection>scm:git:git://github.com/dainiusjocas/lazy-elasticsearch-scroll.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/dainiusjocas/lazy-elasticsearch-scroll.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>master</tag>
     <url>https://github.com/dainiusjocas/lazy-elasticsearch-scroll</url>
   </scm>
 
