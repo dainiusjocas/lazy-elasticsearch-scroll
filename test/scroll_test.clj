@@ -60,6 +60,25 @@
                           :index-name index-name
                           :query      {:query {:terms {:value (range num-of-docs)}}}}))))))
 
+    (testing "if aggs dissoc works as expected"
+      (let [num-of-docs (rand-int number-of-docs)]
+        (is (= num-of-docs (count (scroll/hits
+                                    {:es-host    es-host
+                                     :index-name index-name
+                                     :query      {:query {:terms {:value (range num-of-docs)}}
+                                                  :aggs {:agg-name {:terms {:field :value :size 10}}}}}))))
+        (is (= num-of-docs (count (scroll/hits
+                                    {:es-host    es-host
+                                     :index-name index-name
+                                     :query      {:query {:terms {:value (range num-of-docs)}}
+                                                  "aggs" {:agg-name {:terms {:field :value :size 10}}}}}))))
+        (is (= num-of-docs (count (scroll/hits
+                                    {:es-host    es-host
+                                     :index-name index-name
+                                     :opts       {:preserve-aggs? true}
+                                     :query      {:query {:terms {:value (range num-of-docs)}}
+                                                  "aggs" {:agg-name {:terms {:field :value :size 10}}}}}))))))
+
     (testing "resuming scroll with search_after is not possible"
       (let [query {:sort ["_doc"]}
             records (scroll/hits

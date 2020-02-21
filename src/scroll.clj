@@ -83,10 +83,16 @@
 (defn fetch [{:keys [es-host index-name query scroll-id opts] :as req}]
   (let [batch (if scroll-id
                 (continue es-host scroll-id opts)
-                (scroll/start es-host index-name query opts))]
+                (start es-host index-name query opts))]
+    (log/debugf "Fetching a batch took: %s ms" (or (get batch :took) (get batch "took")))
     (when-let [current-hits (seq (extract-hits batch (get opts :keywordize?)))]
       (lazy-cat current-hits
                 (fetch (assoc req :scroll-id (extract-scroll-id batch (get opts :keywordize?))))))))
+
+(defn dissoc-aggs [scroll-request]
+  (-> scroll-request
+      (update :query dissoc :aggs)
+      (update :query dissoc "aggs")))
 
 (defn hits
   "Returns a lazy sequence of hits from Elasticsearch using Scroll API.
@@ -103,7 +109,9 @@
   [{:keys [es-host] :as scroll-request}]
   (assert (string? es-host) (format "Invalid Elasticsearch host `%s`" es-host))
   (log/infof "Started scrolling with: '%s'" scroll-request)
-  (fetch (update-in scroll-request [:opts :keywordize?] #(not (false? %)))))
+  (fetch (cond-> scroll-request
+                 true (update-in [:opts :keywordize?] #(not (false? %)))
+                 (not (true? (get-in scroll-request [:opts :preserve-aggs?]))) (dissoc-aggs))))
 
 (comment
   (hits
@@ -112,4 +120,14 @@
      :query      {:query {:match_all {}}}
      :opts       {:keep-context "30s"
                   :keywordize?  true
-                  :size         1000}}))
+                  :size         1000}})
+  (hits
+    {:es-host    "http://localhost:9200"
+     :index-name ".kibana"
+     :query      {:query {:match_all {}}
+                  :aggs {:my-aggregation
+                         {:terms {:field :_id}}}}
+     :opts       {:keep-context "30s"
+                  :keywordize?  true
+                  :size         1000
+                  :preserve-aggs? true}}))

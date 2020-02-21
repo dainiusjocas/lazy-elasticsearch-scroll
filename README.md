@@ -3,6 +3,7 @@
 ![Linting](https://github.com/dainiusjocas/lazy-elasticsearch-scroll/workflows/clj-kondo%20linting/badge.svg)
 ![Tests](https://github.com/dainiusjocas/lazy-elasticsearch-scroll/workflows/Tests/badge.svg)
 [![Clojars Project](https://img.shields.io/clojars/v/lt.jocas/lazy-elasticsearch-scroll.svg)](https://clojars.org/lt.jocas/lazy-elasticsearch-scroll)
+[![cljdoc badge](https://cljdoc.org/badge/lt.jocas/lazy-elasticsearch-scroll)](https://cljdoc.org/d/lt.jocas/lazy-elasticsearch-scroll/CURRENT)
 
 Clojure library to use the Elasticsearch Scroll API as a lazy sequence.
 
@@ -97,6 +98,7 @@ If you want to use code straight from Github then:
 - 7.6.x
 - 7.5.x
 - 6.8.x
+- 5.6.X
 
 ## Development
 

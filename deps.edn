@@ -18,5 +18,5 @@
   :test
   {:extra-paths ["test" "test/resources"]
    :extra-deps  {com.cognitect/test-runner      {:git/url "https://github.com/cognitect-labs/test-runner.git"
-                                                 :sha     "028a6d41ac9ac5d5c405dfc38e4da6b4cc1255d5"}}
+                                                 :sha     "f7ef16dc3b8332b0d77bc0274578ad5270fbfedd"}}
    :main-opts   ["-m" "cognitect.test-runner"]}}}
