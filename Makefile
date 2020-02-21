@@ -13,6 +13,6 @@ run-integration-tests:
 	docker-compose $(ES_7_TEST) up --remove-orphans --abort-on-container-exit --exit-code-from lib-test
 
 release:
-	rm release.properties
-	rm pom.xml.releaseBackup
+	rm release.properties || true
+	rm pom.xml.releaseBackup || true
 	mvn release:prepare
