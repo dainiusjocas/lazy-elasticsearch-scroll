@@ -8,7 +8,7 @@ Clojure library to use the Elasticsearch Scroll API as a lazy sequence.
 
 ## Use Cases
 
-The purpose of the library is to have an interface the consume **all** the data from ES. Why would you need to do that:
+The purpose of the library is to have an interface the consume **all** or some part the data from Elasticsearch. Why would you need to do that:
 
 - One-off data transfer between Elasticsearch clusters (e.g. production -> staging);
 - One-off query replay from Elasticsearch logs cluster with slow queries back to the production Elasticsearch cluster;
