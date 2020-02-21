@@ -6,9 +6,23 @@
 
 Clojure library to use the Elasticsearch Scroll API as a lazy sequence.
 
-## Latest version
+## Use Cases
 
-If you're using `deps.edn` then:
+The purpose of the library is to have an interface the consume **all** or some part the data from Elasticsearch. Why would you need to do that:
+
+- One-off data transfer between Elasticsearch clusters (e.g. production -> staging);
+- One-off query replay from Elasticsearch logs cluster with slow queries back to the production Elasticsearch cluster;
+- If your enriched documents goes directly to the production Elasticsearch, and you want to play with the enriched data on your laptop.
+- etc...
+
+## Latest Version
+
+The library is uploaded to [Clojars](https://clojars.org/lt.jocas/lazy-elasticsearch-scroll), so you can just: 
+```clojure
+{:deps {lazy-elasticsearch-scroll {:mvn/version "1.0.4"}}}
+```
+
+If you want to use code straight from Github then:
 ```clojure
 {:deps {lazy-elasticsearch-scroll {:git/url "https://github.com/dainiusjocas/lazy-elasticsearch-scroll.git"
                                    :sha "b8a01341cfac4747274e3b49a169d3e54d1f1dfa"}}}
