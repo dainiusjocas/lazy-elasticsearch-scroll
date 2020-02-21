@@ -13,3 +13,5 @@ pom.xml.asc
 .cpcache/
 .idea/
 **.iml
+release.properties
+pom.xml.releaseBackup
