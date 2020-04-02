@@ -8,7 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: adriffaud/lint-clojure@v1
+      - uses: actions/checkout@v2
+      - uses: DeLaGuardo/clojure-lint-action@v1
         with:
-          path: ./src
+          clj-kondo-args: --lint src
+          # secrets.GITHUB_TOKEN is needed here
+          # to publish annotations back to github
+          # this action is not storing or sending it anywhere
+          github_token: ${{ secrets.GITHUB_TOKEN }}
