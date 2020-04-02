@@ -1,10 +1,10 @@
 {:paths
  ["src"]
  :deps
- {org.clojure/clojure       {:mvn/version "1.10.2-alpha1"}
-  http-kit                  {:mvn/version "2.4.0-alpha6"}
-  metosin/jsonista          {:mvn/version "0.2.5"}
-  org.clojure/tools.logging {:mvn/version "1.0.0"}}
+ {org.clojure/clojure {:mvn/version "1.10.2-alpha1"}
+  clj-http-lite       {:git/url "https://github.com/borkdude/clj-http-lite"
+                       :sha     "f44ebe45446f0f44f2b73761d102af3da6d0a13e"}
+  cheshire            {:mvn/version "5.10.0"}}
  :aliases
  {:dev
   {:extra-paths ["test" "test/resources"]
@@ -17,6 +17,10 @@
                  ch.qos.logback/logback-classic {:mvn/version "1.2.3"}}}
   :test
   {:extra-paths ["test" "test/resources"]
-   :extra-deps  {com.cognitect/test-runner      {:git/url "https://github.com/cognitect-labs/test-runner.git"
-                                                 :sha     "f7ef16dc3b8332b0d77bc0274578ad5270fbfedd"}}
+   :extra-deps  {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
+                                            :sha     "f7ef16dc3b8332b0d77bc0274578ad5270fbfedd"}
+
+                 metosin/jsonista          {:mvn/version "0.2.5"}
+                 http-kit                  {:mvn/version "2.4.0-alpha6"}
+                 org.clojure/tools.logging {:mvn/version "1.0.0"}}
    :main-opts   ["-m" "cognitect.test-runner"]}}}

@@ -2,14 +2,23 @@
   (:require
     [clojure.string :as string]
     [jsonista.core :as json]
-    [org.httpkit.client :as http]
-    [scroll :as scroll])
-  (:import (java.util UUID)))
+    [org.httpkit.client :as http])
+  (:import (java.util UUID)
+           (javax.net.ssl SSLEngine SSLParameters SNIHostName)
+           (java.net URI)))
+
+(defn sni-configure
+  [^SSLEngine ssl-engine ^URI uri]
+  (let [^SSLParameters ssl-params (.getSSLParameters ssl-engine)]
+    (.setServerNames ssl-params [(SNIHostName. (.getHost uri))])
+    (.setSSLParameters ssl-engine ssl-params)))
+
+(def client (delay (http/make-client {:ssl-configurer sni-configure})))
 
 (defn index-exists? [es-host index-name]
   @(http/request
      {:method :head
-      :client @scroll/client
+      :client @client
       :url    (format "%s/%s" es-host index-name)}
      (fn [resp] (not (= 404 (:status resp))))))
 
@@ -17,7 +26,7 @@
   (if (index-exists? es-host index-name)
     @(http/request
        {:method  :delete
-        :client  @scroll/client
+        :client  @client
         :url     (format "%s/%s" es-host index-name)
         :headers {"Content-Type" "application/json"}}
        (fn [resp]
@@ -28,7 +37,7 @@
 (defn create-index [es-host index-name]
   @(http/request
      {:method  :put
-      :client  @scroll/client
+      :client  @client
       :url     (format "%s/%s" es-host index-name)
       :headers {"Content-Type" "application/json"}
       :body    (json/write-value-as-string {})}
@@ -39,7 +48,7 @@
 (defn refresh-index [dest-host dest-index]
   @(http/request
      {:method  :get
-      :client  @scroll/client
+      :client  @client
       :url     (format "%s/%s/_refresh" dest-host dest-index)
       :headers {"Content-Type" "application/json"}}
      (fn [resp]
