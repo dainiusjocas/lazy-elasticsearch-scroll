@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: action/setup-clj-kondo@v1
+      - uses: actions/checkout@v2
+      - uses: DeLaGuardo/clojure-lint-action@v1
         with:
-          version: '2019.11.23'
-
-      - uses: actions/checkout@latest
-
-      - name: Run on ubuntu or macosx
-        run: clj-kondo --lint src
+          clj-kondo-args: --lint src
+          # secrets.GITHUB_TOKEN is needed here
+          # to publish annotations back to github
+          # this action is not storing or sending it anywhere
+          github_token: ${{ secrets.GITHUB_TOKEN }}
