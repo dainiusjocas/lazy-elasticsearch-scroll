@@ -8,7 +8,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: adriffaud/lint-clojure@v1
+      - uses: action/setup-clj-kondo@v1
         with:
-          path: ./src
+          version: '2019.11.23'
+
+      - uses: actions/checkout@latest
+
+      - name: Run on ubuntu or macosx
+        run: clj-kondo --lint src
