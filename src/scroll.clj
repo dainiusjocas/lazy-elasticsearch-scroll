@@ -39,7 +39,7 @@
   (exponential-backoff
     (fn []
       @(http/request
-         {:method  :post
+         {:method  :get
           :client  @client
           :url     url
           :headers {"Content-Type" "application/json"}
