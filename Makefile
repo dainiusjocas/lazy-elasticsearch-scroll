@@ -12,7 +12,9 @@ run-integration-tests:
 	docker-compose $(ES_7_TEST) build
 	docker-compose $(ES_7_TEST) up --remove-orphans --abort-on-container-exit --exit-code-from lib-test
 
+.PHONY: release
 release:
 	rm release.properties || true
 	rm pom.xml.releaseBackup || true
+	clojure -Spom
 	mvn release:prepare
