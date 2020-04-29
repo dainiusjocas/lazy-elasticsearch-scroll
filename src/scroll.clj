@@ -52,7 +52,7 @@
              (when error (throw (Exception. ^String (:reason error))))
              (if (<= 200 status 299)
                decoded-body
-               (throw (Exception. "Response exception")))))))))
+               (throw (Exception. "Response exception"))))))) opts))
 
 (def default-size 1000)
 (def default-query {:sort ["_doc"]})
@@ -111,6 +111,7 @@
   (log/infof "Started scrolling with: '%s'" scroll-request)
   (fetch (cond-> scroll-request
                  true (update-in [:opts :keywordize?] #(not (false? %)))
+                 true (update :opts merge default-exponential-backoff-params)
                  (not (true? (get-in scroll-request [:opts :preserve-aggs?]))) (dissoc-aggs))))
 
 (comment
