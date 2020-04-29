@@ -24,7 +24,7 @@
          (if (p? t)
            (do
              (Thread/sleep time)
-             (exponential-backoff f (assoc opts :rate (* time rate))))
+             (exponential-backoff f (assoc opts :time (* time rate))))
            (throw t)))))))
 
 (defn sni-configure
