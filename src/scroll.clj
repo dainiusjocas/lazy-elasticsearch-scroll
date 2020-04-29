@@ -38,21 +38,26 @@
 (defn execute-request [{:keys [url body opts]}]
   (exponential-backoff
     (fn []
-      @(http/request
-         {:method  :get
-          :client  @client
-          :url     url
-          :headers {"Content-Type" "application/json"}
-          :body    (json/write-value-as-string body)}
-         (fn [{:keys [status body error]}]
-           (when error (throw error))
-           (let [{:keys [error] :as decoded-body}
-                 (json/read-value body (json/object-mapper
-                                         {:decode-key-fn (get opts :keywordize?)}))]
-             (when error (throw (Exception. ^String (:reason error))))
-             (if (<= 200 status 299)
-               decoded-body
-               (throw (Exception. "Response exception"))))))) opts))
+      (let [resp @(http/request
+                    {:method  :get
+                     :client  @client
+                     :url     url
+                     :headers {"Content-Type" "application/json"}
+                     :body    (json/write-value-as-string body)}
+                    (fn [{:keys [status body error]}]
+                      (when error (throw (Exception. (str error))))
+                      (let [{:keys [error] :as decoded-body}
+                            (json/read-value body (json/object-mapper
+                                                    {:decode-key-fn (get opts :keywordize?)}))]
+
+                        (when error (throw (Exception. (str error))))
+                        (if (<= 200 status 299)
+                          decoded-body
+                          (throw (Exception. "Response exception"))))))]
+        (if (:error resp)
+          (throw (Exception. (str (:error resp))))
+          resp)))
+    opts))
 
 (def default-size 1000)
 (def default-query {:sort ["_doc"]})
@@ -109,10 +114,12 @@
   [{:keys [es-host] :as scroll-request}]
   (assert (string? es-host) (format "Invalid Elasticsearch host `%s`" es-host))
   (log/infof "Started scrolling with: '%s'" scroll-request)
-  (fetch (cond-> scroll-request
-                 true (update-in [:opts :keywordize?] #(not (false? %)))
-                 true (update :opts merge default-exponential-backoff-params)
-                 (not (true? (get-in scroll-request [:opts :preserve-aggs?]))) (dissoc-aggs))))
+  (try
+    (fetch (cond-> scroll-request
+                   true (update-in [:opts :keywordize?] #(not (false? %)))
+                   true (update :opts (fn [opts] (merge default-exponential-backoff-params opts)))
+                   (not (true? (get-in scroll-request [:opts :preserve-aggs?]))) (dissoc-aggs)))
+    (catch Exception _ [])))
 
 (comment
   (hits

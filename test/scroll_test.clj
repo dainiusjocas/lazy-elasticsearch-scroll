@@ -56,9 +56,9 @@
     (testing "if query limits the number of items returned"
       (let [num-of-docs (rand-int number-of-docs)]
         (is (= num-of-docs (count (scroll/hits
-                         {:es-host    es-host
-                          :index-name index-name
-                          :query      {:query {:terms {:value (range num-of-docs)}}}}))))))
+                                    {:es-host    es-host
+                                     :index-name index-name
+                                     :query      {:query {:terms {:value (range num-of-docs)}}}}))))))
 
     (testing "if aggs dissoc works as expected"
       (let [num-of-docs (rand-int number-of-docs)]
@@ -94,7 +94,9 @@
                           {:es-host    es-host
                            :index-name index-name
                            :query      (assoc query :search_after (:sort first-record))
-                           :opts       {:size 1}}))))))
+                           :opts       {:size 1
+                                        :time 10
+                                        :max  11}}))))))
 
     (testing "if batch size is equal 0 then empty list of records should be returned with an error in the log"
       (is (= 0
@@ -102,7 +104,9 @@
                (scroll/hits
                  {:es-host    es-host
                   :index-name index-name
-                  :opts       {:size 0}})))))
+                  :opts       {:size 0
+                               :time 10
+                               :max  11}})))))
 
     ;(testing "laziness: take 5 records sleep till scroll id expires; try to take all after sleep not fail in that"
     ;  (let [records (scroll/hits
