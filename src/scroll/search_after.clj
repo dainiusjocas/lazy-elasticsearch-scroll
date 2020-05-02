@@ -8,23 +8,30 @@
 (defn start [es-host index-name query opts]
   (request/execute-request
     {:url  (format "%s/%s/_search" es-host (or index-name "*"))
-     :body (batch/set-batch-size (or query default-query) opts)
+     :body (batch/set-batch-size
+             (if (:sort query)
+               (or query default-query)
+               (assoc query :sort [:_doc]))
+             opts)
      :opts opts}))
 
 (defn continue [es-host index-name query search-after opts]
-  (request/execute-request
-    {:url  (format "%s/%s/_search" es-host (or index-name "*"))
-     :body (batch/set-batch-size (assoc (or query default-query) :search_after search-after) opts)
-     :opts opts}))
+  (request/execute-request {:url  (format "%s/%s/_search" es-host (or index-name "*"))
+                            :body (batch/set-batch-size
+                                    (if (:sort query)
+                                      (assoc (or query default-query) :search_after search-after)
+                                      (assoc query :sort [:_doc]
+                                                   :search_after search-after)) opts)
+                            :opts opts}))
 
 (defn extract-hits [batch keywordize?]
   (get-in batch (if keywordize? [:hits :hits] ["hits" "hits"])))
 
 (defn extract-search-after [batch keywordize?]
   (if keywordize?
-    (->> batch :hits :hits first :sort)
+    (->> batch :hits :hits last :sort)
     (->> (get-in batch ["hits" "hits"])
-         first
+         last
          (get "sort"))))
 
 (defn fetch [{:keys [es-host index-name query search-after opts] :as req}]
@@ -35,7 +42,8 @@
       (log/debugf "Fetching a batch took: %s ms" (or (get batch :took) (get batch "took")))
       (when-let [current-hits (seq (extract-hits batch (get opts :keywordize?)))]
         (lazy-cat current-hits
-                  (fetch (assoc req :search-after (extract-search-after batch (get opts :keywordize?)))))))
+                  (when-let [sa (extract-search-after batch (get opts :keywordize?))]
+                    (fetch (assoc req :search-after sa))))))
     (catch Exception e
       (.printStackTrace e)
       (log/errorf "Failed to search_after: %s" e)

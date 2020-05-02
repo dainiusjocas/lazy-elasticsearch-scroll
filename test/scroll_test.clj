@@ -5,6 +5,27 @@
     [scroll :as scroll]
     [utils :as utils]))
 
+(deftest ^:integration search-after-strategy
+  (let [es-host (or (System/getenv "ES_HOST") "http://localhost:9200")
+        index-name "scroll-test-index"
+        number-of-docs (+ 10 (rand-int 0))
+        records (map (fn [x] {:_id x
+                              :_source {:value x}}) (range number-of-docs))]
+    (log/infof "Deleted index='%s' at '%s': %s"
+               index-name es-host (utils/delete-index es-host index-name))
+    (log/infof "Created index='%s' at '%s': %s" index-name es-host (utils/create-index es-host index-name))
+    (utils/fill-index es-host index-name records)
+
+    (testing "if all scroll results are fetched"
+      (let [query {:query {:match_all {}} :size 3}
+            hits (scroll/hits
+                   {:es-host    es-host
+                    :index-name index-name
+                    :query      query
+                    :opts       {:keywordize? true
+                                 :strategy :search-after}})]
+        (is (= number-of-docs (count hits)))))))
+
 (deftest ^:integration basic-scroll
   (let [es-host (or (System/getenv "ES_HOST") "http://localhost:9200")
         index-name "scroll-test-index"

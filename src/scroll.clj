@@ -1,6 +1,7 @@
 (ns scroll
   (:require [clojure.tools.logging :as log]
             [scroll.request :as request]
+            [scroll.search-after :as search-after]
             [scroll.scrolling :as scrolling]))
 
 (defn dissoc-aggs [scroll-request]
@@ -23,10 +24,15 @@
   [{:keys [es-host] :as scroll-request}]
   (assert (string? es-host) (format "Invalid Elasticsearch host `%s`" es-host))
   (log/infof "Started scrolling with: '%s'" scroll-request)
-  (scrolling/fetch (cond-> scroll-request
-                           true (update-in [:opts :keywordize?] #(not (false? %)))
-                           true (update :opts (fn [opts] (merge request/default-exponential-backoff-params opts)))
-                           (not (true? (get-in scroll-request [:opts :preserve-aggs?]))) (dissoc-aggs))))
+  (let [scroll-strategy (get-in scroll-request [:opts :strategy])
+        params (cond-> scroll-request
+                       true (update-in [:opts :keywordize?] #(not (false? %)))
+                       true (update :opts (fn [opts] (merge request/default-exponential-backoff-params opts)))
+                       (not (true? (get-in scroll-request [:opts :preserve-aggs?]))) (dissoc-aggs))]
+    (case scroll-strategy
+      :scrolling (scrolling/fetch params)
+      :search-after (search-after/fetch params)
+      (scrolling/fetch params))))
 
 (comment
   (hits
