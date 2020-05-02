@@ -38,25 +38,21 @@
 (defn execute-request [{:keys [url body opts]}]
   (exponential-backoff
     (fn []
-      (let [resp @(http/request
-                    {:method  :get
-                     :client  @client
-                     :url     url
-                     :headers {"Content-Type" "application/json"}
-                     :body    (json/write-value-as-string body)}
-                    (fn [{:keys [status body error]}]
-                      (when error (throw (Exception. (str error))))
-                      (let [{:keys [error] :as decoded-body}
-                            (json/read-value body (json/object-mapper
-                                                    {:decode-key-fn (get opts :keywordize?)}))]
+      (let [{:keys [status body error]} @(http/request
+                                           {:method  :get
+                                            :client  @client
+                                            :url     url
+                                            :headers {"Content-Type" "application/json"}
+                                            :body    (json/write-value-as-string body)})]
+        (when error (throw (Exception. (str error))))
+        (let [{:keys [error] :as decoded-body}
+              (json/read-value body (json/object-mapper
+                                      {:decode-key-fn (get opts :keywordize?)}))]
 
-                        (when error (throw (Exception. (str error))))
-                        (if (<= 200 status 299)
-                          decoded-body
-                          (throw (Exception. "Response exception"))))))]
-        (if (:error resp)
-          (throw (Exception. (str (:error resp))))
-          resp)))
+          (when error (throw (Exception. (str error))))
+          (if (<= 200 status 299)
+            decoded-body
+            (throw (Exception. "Response exception"))))))
     opts))
 
 (def default-size 1000)
