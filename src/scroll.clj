@@ -38,21 +38,22 @@
 (defn execute-request [{:keys [url body opts]}]
   (exponential-backoff
     (fn []
-      @(http/request
-         {:method  :get
-          :client  @client
-          :url     url
-          :headers {"Content-Type" "application/json"}
-          :body    (json/write-value-as-string body)}
-         (fn [{:keys [status body error]}]
-           (when error (throw error))
-           (let [{:keys [error] :as decoded-body}
-                 (json/read-value body (json/object-mapper
-                                         {:decode-key-fn (get opts :keywordize?)}))]
-             (when error (throw (Exception. ^String (:reason error))))
-             (if (<= 200 status 299)
-               decoded-body
-               (throw (Exception. "Response exception")))))))))
+      (let [{:keys [status body error]} @(http/request
+                                           {:method  :get
+                                            :client  @client
+                                            :url     url
+                                            :headers {"Content-Type" "application/json"}
+                                            :body    (json/write-value-as-string body)})]
+        (when error (throw (Exception. (str error))))
+        (let [{:keys [error] :as decoded-body}
+              (json/read-value body (json/object-mapper
+                                      {:decode-key-fn (get opts :keywordize?)}))]
+
+          (when error (throw (Exception. (str error))))
+          (if (<= 200 status 299)
+            decoded-body
+            (throw (Exception. "Response exception"))))))
+    opts))
 
 (def default-size 1000)
 (def default-query {:sort ["_doc"]})
@@ -81,13 +82,15 @@
   (get batch (if keywordize? :_scroll_id "_scroll_id")))
 
 (defn fetch [{:keys [es-host index-name query scroll-id opts] :as req}]
-  (let [batch (if scroll-id
-                (continue es-host scroll-id opts)
-                (start es-host index-name query opts))]
-    (log/debugf "Fetching a batch took: %s ms" (or (get batch :took) (get batch "took")))
-    (when-let [current-hits (seq (extract-hits batch (get opts :keywordize?)))]
-      (lazy-cat current-hits
-                (fetch (assoc req :scroll-id (extract-scroll-id batch (get opts :keywordize?))))))))
+  (try
+    (let [batch (if scroll-id
+                  (continue es-host scroll-id opts)
+                  (start es-host index-name query opts))]
+      (log/debugf "Fetching a batch took: %s ms" (or (get batch :took) (get batch "took")))
+      (when-let [current-hits (seq (extract-hits batch (get opts :keywordize?)))]
+        (lazy-cat current-hits
+                  (fetch (assoc req :scroll-id (extract-scroll-id batch (get opts :keywordize?)))))))
+    (catch Exception _ [])))
 
 (defn dissoc-aggs [scroll-request]
   (-> scroll-request
@@ -111,6 +114,7 @@
   (log/infof "Started scrolling with: '%s'" scroll-request)
   (fetch (cond-> scroll-request
                  true (update-in [:opts :keywordize?] #(not (false? %)))
+                 true (update :opts (fn [opts] (merge default-exponential-backoff-params opts)))
                  (not (true? (get-in scroll-request [:opts :preserve-aggs?]))) (dissoc-aggs))))
 
 (comment

@@ -56,9 +56,9 @@
     (testing "if query limits the number of items returned"
       (let [num-of-docs (rand-int number-of-docs)]
         (is (= num-of-docs (count (scroll/hits
-                         {:es-host    es-host
-                          :index-name index-name
-                          :query      {:query {:terms {:value (range num-of-docs)}}}}))))))
+                                    {:es-host    es-host
+                                     :index-name index-name
+                                     :query      {:query {:terms {:value (range num-of-docs)}}}}))))))
 
     (testing "if aggs dissoc works as expected"
       (let [num-of-docs (rand-int number-of-docs)]
@@ -94,7 +94,9 @@
                           {:es-host    es-host
                            :index-name index-name
                            :query      (assoc query :search_after (:sort first-record))
-                           :opts       {:size 1}}))))))
+                           :opts       {:size 1
+                                        :time 10
+                                        :max  11}}))))))
 
     (testing "if batch size is equal 0 then empty list of records should be returned with an error in the log"
       (is (= 0
@@ -102,18 +104,23 @@
                (scroll/hits
                  {:es-host    es-host
                   :index-name index-name
-                  :opts       {:size 0}})))))
+                  :opts       {:size 0
+                               :time 10
+                               :max  11}})))))
 
-    ;(testing "laziness: take 5 records sleep till scroll id expires; try to take all after sleep not fail in that"
-    ;  (let [records (scroll/hits
-    ;                  {:es-host    es-host
-    ;                   :index-name index-name
-    ;                   :opts       {:size         1
-    ;                                :keep-context "1s"}})]
-    ;    (is (= 5 (count (take 5 records))))
-    ;    ; long sleep for scroll-id to expire
-    ;    (Thread/sleep 60000)
-    ;    (is (= 5 (count records)))))
+    (testing "laziness: take 5 records sleep till scroll id expires; try to take all after sleep not fail in that"
+      (let [records (scroll/hits
+                      {:es-host    es-host
+                       :index-name index-name
+                       :opts       {:size         5
+                                    :keep-context "1ms"
+                                    :time 10
+                                    :max  11}})]
+        (is (= 5 (count (take 5 records))))
+        ; Auto scroll context deletion is an async op, it might take up to a minute.
+        ; By deleting all scroll contexts we simulate expiration, instead of sleeping.
+        (utils/delete-all-scroll-contexts es-host)
+        (is (= 5 (count records)))))
 
     (testing "various incomplete inputs"
       (try
