@@ -22,6 +22,7 @@
      (try
        (f)
        (catch Throwable t
+         (log/errorf "Exponential backoff failed with '%s'" t)
          (if (p? t)
            (do
              (Thread/sleep time)
