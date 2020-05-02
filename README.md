@@ -93,10 +93,16 @@ If you want to use code straight from Github then:
  {"_score" nil, "_type" "_doc", "sort" [0], "_source" {"value" 0}, "_id" "0", "_index" "scroll-test-index"})
 ```
 
+## User Authorization
+
+The basic authorization is supported via environment variables:
+
+- `ELASTIC_USERNAME`, no default value
+- `ELASTIC_PASSWORD`, no default value
+
 ## Supported Elasticsearch versions
 
 - 7.6.x
-- 7.5.x
 - 6.8.x
 - 5.6.X
 

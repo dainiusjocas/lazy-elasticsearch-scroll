@@ -5,6 +5,7 @@
     [jsonista.core :as json])
   (:import
     (javax.net.ssl SSLParameters SSLEngine SNIHostName)
+    (java.util Base64)
     (java.net URI)))
 
 (def default-exponential-backoff-params
@@ -35,6 +36,14 @@
 
 (def client (delay (http/make-client {:ssl-configurer sni-configure})))
 
+(defn prepare-headers [_]
+  ; basic authorization
+  ; https://www.elastic.co/guide/en/elasticsearch/reference/current/http-clients.html
+  (let [token (.encodeToString (Base64/getEncoder)
+                               (.getBytes (str (System/getenv "ELASTIC_USERNAME") ":" (System/getenv "ELASTIC_PASSWORD"))))]
+    {"Content-Type"  "application/json"
+     "Authorization" (str "Basic " token)}))
+
 (defn execute-request [{:keys [url body opts]}]
   (exponential-backoff
     (fn []
@@ -42,7 +51,7 @@
                                            {:method  :get
                                             :client  @client
                                             :url     url
-                                            :headers {"Content-Type" "application/json"}
+                                            :headers (prepare-headers opts)
                                             :body    (json/write-value-as-string body)})]
         (when error (throw (Exception. (str error))))
         (let [{:keys [error] :as decoded-body}
@@ -90,7 +99,9 @@
       (when-let [current-hits (seq (extract-hits batch (get opts :keywordize?)))]
         (lazy-cat current-hits
                   (fetch (assoc req :scroll-id (extract-scroll-id batch (get opts :keywordize?)))))))
-    (catch Exception _ [])))
+    (catch Exception e
+      (log/errorf "Failed to scroll: %s" e)
+      [])))
 
 (defn dissoc-aggs [scroll-request]
   (-> scroll-request
