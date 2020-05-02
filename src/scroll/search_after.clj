@@ -1,17 +1,17 @@
-(ns search-after
-  (:require [scroll :as scroll]
-            [clojure.tools.logging :as log]))
+(ns scroll.search-after
+  (:require [clojure.tools.logging :as log]
+            [scroll.request :as request]))
 
 (def default-query {:sort ["_doc"]})
 
 (defn start [es-host index-name query opts]
-  (scroll/execute-request
+  (request/execute-request
     {:url  (format "%s/%s/_search" es-host (or index-name "*"))
      :body (scroll/set-batch-size (or query default-query) opts)
      :opts opts}))
 
 (defn continue [es-host index-name query search-after opts]
-  (scroll/execute-request
+  (request/execute-request
     {:url  (format "%s/%s/_search" es-host (or index-name "*"))
      :body (scroll/set-batch-size (assoc (or query default-query) :search_after search-after) opts)
      :opts opts}))

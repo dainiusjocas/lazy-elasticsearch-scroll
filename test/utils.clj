@@ -3,7 +3,7 @@
     [clojure.string :as string]
     [jsonista.core :as json]
     [org.httpkit.client :as http]
-    [scroll :as scroll])
+    [scroll.request :as scroll])
   (:import (java.util UUID)))
 
 (defn index-exists? [es-host index-name]
