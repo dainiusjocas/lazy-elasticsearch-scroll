@@ -1,5 +1,6 @@
 (ns scroll.search-after
   (:require [clojure.tools.logging :as log]
+            [scroll.batch :as batch]
             [scroll.request :as request]))
 
 (def default-query {:sort ["_doc"]})
@@ -7,13 +8,13 @@
 (defn start [es-host index-name query opts]
   (request/execute-request
     {:url  (format "%s/%s/_search" es-host (or index-name "*"))
-     :body (scroll/set-batch-size (or query default-query) opts)
+     :body (batch/set-batch-size (or query default-query) opts)
      :opts opts}))
 
 (defn continue [es-host index-name query search-after opts]
   (request/execute-request
     {:url  (format "%s/%s/_search" es-host (or index-name "*"))
-     :body (scroll/set-batch-size (assoc (or query default-query) :search_after search-after) opts)
+     :body (batch/set-batch-size (assoc (or query default-query) :search_after search-after) opts)
      :opts opts}))
 
 (defn extract-hits [batch keywordize?]
@@ -22,7 +23,9 @@
 (defn extract-search-after [batch keywordize?]
   (if keywordize?
     (->> batch :hits :hits first :sort)
-    (->> batch "hits" "hits" first "sort")))
+    (->> (get-in batch ["hits" "hits"])
+         first
+         (get "sort"))))
 
 (defn fetch [{:keys [es-host index-name query search-after opts] :as req}]
   (try
