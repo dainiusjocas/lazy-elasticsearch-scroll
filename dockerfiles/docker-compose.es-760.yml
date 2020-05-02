@@ -16,6 +16,6 @@ services:
   kibana:
     image: docker.elastic.co/kibana/kibana:7.6.2
     environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
       - 5601:5601
