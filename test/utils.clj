@@ -25,6 +25,16 @@
                           (json/object-mapper {:decode-key-fn true}))))
     {:message "Index does not exist."}))
 
+(defn delete-all-scroll-contexts [es-host]
+  @(http/request
+     {:method  :delete
+      :client  @scroll/client
+      :url     (format "%s/_search/scroll/_all" es-host)
+      :headers {"Content-Type" "application/json"}}
+     (fn [resp]
+       (json/read-value (:body resp)
+                        (json/object-mapper {:decode-key-fn true})))))
+
 (defn create-index [es-host index-name]
   @(http/request
      {:method  :put

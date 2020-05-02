@@ -86,13 +86,15 @@
   (get batch (if keywordize? :_scroll_id "_scroll_id")))
 
 (defn fetch [{:keys [es-host index-name query scroll-id opts] :as req}]
-  (let [batch (if scroll-id
-                (continue es-host scroll-id opts)
-                (start es-host index-name query opts))]
-    (log/debugf "Fetching a batch took: %s ms" (or (get batch :took) (get batch "took")))
-    (when-let [current-hits (seq (extract-hits batch (get opts :keywordize?)))]
-      (lazy-cat current-hits
-                (fetch (assoc req :scroll-id (extract-scroll-id batch (get opts :keywordize?))))))))
+  (try
+    (let [batch (if scroll-id
+                  (continue es-host scroll-id opts)
+                  (start es-host index-name query opts))]
+      (log/debugf "Fetching a batch took: %s ms" (or (get batch :took) (get batch "took")))
+      (when-let [current-hits (seq (extract-hits batch (get opts :keywordize?)))]
+        (lazy-cat current-hits
+                  (fetch (assoc req :scroll-id (extract-scroll-id batch (get opts :keywordize?)))))))
+    (catch Exception _ [])))
 
 (defn dissoc-aggs [scroll-request]
   (-> scroll-request
@@ -114,12 +116,10 @@
   [{:keys [es-host] :as scroll-request}]
   (assert (string? es-host) (format "Invalid Elasticsearch host `%s`" es-host))
   (log/infof "Started scrolling with: '%s'" scroll-request)
-  (try
-    (fetch (cond-> scroll-request
-                   true (update-in [:opts :keywordize?] #(not (false? %)))
-                   true (update :opts (fn [opts] (merge default-exponential-backoff-params opts)))
-                   (not (true? (get-in scroll-request [:opts :preserve-aggs?]))) (dissoc-aggs)))
-    (catch Exception _ [])))
+  (fetch (cond-> scroll-request
+                 true (update-in [:opts :keywordize?] #(not (false? %)))
+                 true (update :opts (fn [opts] (merge default-exponential-backoff-params opts)))
+                 (not (true? (get-in scroll-request [:opts :preserve-aggs?]))) (dissoc-aggs))))
 
 (comment
   (hits

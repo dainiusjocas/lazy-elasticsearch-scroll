@@ -108,16 +108,19 @@
                                :time 10
                                :max  11}})))))
 
-    ;(testing "laziness: take 5 records sleep till scroll id expires; try to take all after sleep not fail in that"
-    ;  (let [records (scroll/hits
-    ;                  {:es-host    es-host
-    ;                   :index-name index-name
-    ;                   :opts       {:size         1
-    ;                                :keep-context "1s"}})]
-    ;    (is (= 5 (count (take 5 records))))
-    ;    ; long sleep for scroll-id to expire
-    ;    (Thread/sleep 60000)
-    ;    (is (= 5 (count records)))))
+    (testing "laziness: take 5 records sleep till scroll id expires; try to take all after sleep not fail in that"
+      (let [records (scroll/hits
+                      {:es-host    es-host
+                       :index-name index-name
+                       :opts       {:size         5
+                                    :keep-context "1ms"
+                                    :time 10
+                                    :max  11}})]
+        (is (= 5 (count (take 5 records))))
+        ; Auto scroll context deletion is an async op, it might take up to a minute.
+        ; By deleting all scroll contexts we simulate expiration, instead of sleeping.
+        (utils/delete-all-scroll-contexts es-host)
+        (is (= 5 (count records)))))
 
     (testing "various incomplete inputs"
       (try
