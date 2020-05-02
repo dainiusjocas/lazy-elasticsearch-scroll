@@ -36,13 +36,16 @@
 
 (def client (delay (http/make-client {:ssl-configurer sni-configure})))
 
+(defn authorization-token []
+  (.encodeToString (Base64/getEncoder)
+                   (.getBytes (str (System/getenv "ELASTIC_USERNAME")
+                                   ":"
+                                   (System/getenv "ELASTIC_PASSWORD")))))
 (defn prepare-headers [_]
   ; basic authorization
   ; https://www.elastic.co/guide/en/elasticsearch/reference/current/http-clients.html
-  (let [token (.encodeToString (Base64/getEncoder)
-                               (.getBytes (str (System/getenv "ELASTIC_USERNAME") ":" (System/getenv "ELASTIC_PASSWORD"))))]
-    {"Content-Type"  "application/json"
-     "Authorization" (str "Basic " token)}))
+  {"Content-Type"  "application/json"
+   "Authorization" (str "Basic " (authorization-token))})
 
 (defn execute-request [{:keys [url body opts]}]
   (exponential-backoff
