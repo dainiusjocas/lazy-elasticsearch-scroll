@@ -33,8 +33,10 @@
 
 (defn extract-search-after [batch keywordize?]
   (if keywordize?
-    (->> batch :hits :hits last :sort)
-    (->> (get-in batch ["hits" "hits"])
+    (-> (get-in batch [:hits :hits])
+        last
+        (get :sort))
+    (-> (get-in batch ["hits" "hits"])
          last
          (get "sort"))))
 

@@ -48,6 +48,18 @@
                                  :strategy    :search-after
                                  :time        10
                                  :max         11}})]
+        (is (= number-of-docs (count hits)))))
+
+    (testing "search after not keywordized"
+      (let [query {:query {:match_all {}} :size 3}
+            hits (scroll/hits
+                   {:es-host    es-host
+                    :index-name index-name
+                    :query      query
+                    :opts       {:keywordize? false
+                                 :strategy    :search-after
+                                 :time        10
+                                 :max         11}})]
         (is (= number-of-docs (count hits)))))))
 
 (deftest ^:integration basic-scroll
