@@ -128,12 +128,13 @@ The `search-after` strategy has several nice benefits:
 - `search_after` under the hood is filtering, filters can be cached, so it is reasonably fast;
 - uses the standard search API.
 
-However `search-after` might cause some troubles:
-- document sets might be inconsistent because of parallel updates to the indices;
+However `search-after` is not a silver bullet:
+- slower then scrolling;
+- no point in time snapshot of data (might get some data multiple times);
 - it requires thinking which attributes to use for sorting;
-- sorting on `_id` is resource intensive, therefore you might get timeouts;
-- sorting on `_doc` is unpredictable because _doc is unique per shard;
-- no clear way to parallelize fetching.
+    - sorting on `_id` is resource intensive, therefore you might get timeouts;
+    - sorting on `_doc` is unpredictable because _doc is unique per shard;
+- how to parallelize fetching?
 
 ## User Authorization
 
