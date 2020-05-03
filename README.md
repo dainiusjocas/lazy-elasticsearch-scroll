@@ -111,12 +111,18 @@ The basic authorization is supported via environment variables:
 Run the development environment `make run-dev-env`. This will start a `docker-compose` cluster with Elasticsearch
 and Kibana on exposed ports `9200` and `5601` respectively.
 
-Run integration tests locally `make run-integration-tests`. This will start a `docker-compose` in which the integration
-tests will be run.
-
 To run development environment with a specific ELK version:
 ```shell script
 (export ES_VERSION=6.8.8 && make run-dev-env)
+```
+
+Run integration tests locally `make run-integration-tests`. This will start a `docker-compose` in which the integration
+tests will be run.
+
+To run integration tests with a specific ELK version:
+
+```shell script
+(export ES_VERSION=6.8.8 && make run-integration-tests)
 ```
 
 ## License
