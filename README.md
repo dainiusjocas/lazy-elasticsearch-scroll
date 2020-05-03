@@ -5,15 +5,21 @@
 [![Clojars Project](https://img.shields.io/clojars/v/lt.jocas/lazy-elasticsearch-scroll.svg)](https://clojars.org/lt.jocas/lazy-elasticsearch-scroll)
 [![cljdoc badge](https://cljdoc.org/badge/lt.jocas/lazy-elasticsearch-scroll)](https://cljdoc.org/d/lt.jocas/lazy-elasticsearch-scroll/CURRENT)
 
-Clojure library to use the Elasticsearch Scroll API as a lazy sequence.
+Clojure library to get the data from Elasticsearch as a lazy sequence. Following strategies are supported:
+- [Scroll API](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-body.html#request-body-search-scroll)
+- [`search_after`](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-body.html#request-body-search-search-after)
+- TODO: sliced scroll
+
+The scroll API is the default strategy.
 
 ## Use Cases
 
 The purpose of the library is to have an interface the consume **all** or some part the data from Elasticsearch. Why would you need to do that:
 
+- You need more documents than `index.max_result_window`;
 - One-off data transfer between Elasticsearch clusters (e.g. production -> staging);
 - One-off query replay from Elasticsearch logs cluster with slow queries back to the production Elasticsearch cluster;
-- If your enriched documents goes directly to the production Elasticsearch, and you want to play with the enriched data on your laptop.
+- If your enriched documents goes directly to the production Elasticsearch, and you want to play with the enriched data on your laptop;
 - etc...
 
 ## Latest Version
@@ -93,6 +99,43 @@ If you want to use the code straight from Github then:
  {"_score" nil, "_type" "_doc", "sort" [0], "_source" {"value" 0}, "_id" "0", "_index" "scroll-test-index"})
 ```
 
+## Using strategies
+
+To specify strategy you need to pass one of the following keys in the opts map: `[:scroll-api :search-after]`. For the scroll API:
+
+```clojure
+(scroll/hits
+  {:es-host    "http://localhost:9200"
+   :opts       {:strategy     :scroll-api}})
+```
+
+For the `search_after`:
+```clojure
+(scroll/hits
+  {:es-host    "http://localhost:9200"
+   :opts       {:strategy     :search-after}})
+```
+
+## Compare strategies
+
+The scroll API is the default choice because it is the most common and relatively convenient way of getting documents from Elasticsearch. However, it has several disadvantages:
+- it creates state in the cluster (what if only GET requests are allowed in your environment?);
+- might get resource intensive;
+- if your downstream consumers are not fast enough then scroll context might expire and then you need to start over;
+
+The `search-after` strategy has several nice benefits:
+- it is stateless (no such thing as expired contexts);
+- `search_after` under the hood is filtering, filters can be cached, so it is reasonably fast;
+- uses the standard search API.
+
+However `search-after` [is not a silver bullet](https://github.com/elastic/elasticsearch/issues/16631):
+- slower then scrolling;
+- no point in time snapshot of data (might get some data multiple times);
+- it requires thinking which attributes to use for sorting as tiebreaker;
+    - sorting on `_id` is resource intensive, therefore you might get timeouts;
+    - sorting on `_doc` is unpredictable because _doc is unique per shard;
+- how to parallelize fetching?
+
 ## User Authorization
 
 The basic authorization is supported via environment variables:
@@ -111,8 +154,19 @@ The basic authorization is supported via environment variables:
 Run the development environment `make run-dev-env`. This will start a `docker-compose` cluster with Elasticsearch
 and Kibana on exposed ports `9200` and `5601` respectively.
 
+To run development environment with a specific ELK version:
+```shell script
+(export ES_VERSION=6.8.8 && make run-dev-env)
+```
+
 Run integration tests locally `make run-integration-tests`. This will start a `docker-compose` in which the integration
 tests will be run.
+
+To run integration tests with a specific ELK version:
+
+```shell script
+(export ES_VERSION=6.8.8 && make run-integration-tests)
+```
 
 ## License
 
