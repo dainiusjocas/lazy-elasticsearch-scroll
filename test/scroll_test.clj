@@ -24,6 +24,30 @@
                     :query      query
                     :opts       {:keywordize? true
                                  :strategy :search-after}})]
+        (is (= number-of-docs (count hits)))))
+
+    (testing "query with :from param"
+      (let [query {:query {:match_all {}} :size 3}
+            hits (scroll/hits
+                   {:es-host    es-host
+                    :index-name index-name
+                    :query      (assoc query :from 1)
+                    :opts       {:keywordize? true
+                                 :strategy    :search-after
+                                 :time        10
+                                 :max         11}})]
+        (is (= number-of-docs (count hits)))))
+
+    (testing "search after with index pattern"
+      (let [query {:query {:match_all {}} :size 3}
+            hits (scroll/hits
+                   {:es-host    es-host
+                    :index-name (str index-name "*")
+                    :query      (assoc query :from 1)
+                    :opts       {:keywordize? true
+                                 :strategy    :search-after
+                                 :time        10
+                                 :max         11}})]
         (is (= number-of-docs (count hits)))))))
 
 (deftest ^:integration basic-scroll
