@@ -128,10 +128,10 @@ The `search-after` strategy has several nice benefits:
 - `search_after` under the hood is filtering, filters can be cached, so it is reasonably fast;
 - uses the standard search API.
 
-However `search-after` is not a silver bullet:
+However `search-after` [is not a silver bullet](https://github.com/elastic/elasticsearch/issues/16631):
 - slower then scrolling;
 - no point in time snapshot of data (might get some data multiple times);
-- it requires thinking which attributes to use for sorting;
+- it requires thinking which attributes to use for sorting as tiebreaker;
     - sorting on `_id` is resource intensive, therefore you might get timeouts;
     - sorting on `_doc` is unpredictable because _doc is unique per shard;
 - how to parallelize fetching?
