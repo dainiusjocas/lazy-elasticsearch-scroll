@@ -1,6 +1,7 @@
 (ns exponential-backoff-test
   (:require [clojure.test :refer [deftest is testing]]
             [clojure.tools.logging :as log]
+            [scroll :as scroll]
             [utils :as utils]))
 
 (deftest ^:integration exponential-backoff-fail

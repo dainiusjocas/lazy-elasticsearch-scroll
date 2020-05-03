@@ -19,4 +19,4 @@ services:
       dockerfile: dockerfiles/Dockerfile.test
     environment:
       ES_HOST: http://elasticsearch:9200
-    command: ["clojure", "-A:test", "-i", "integration"]
+    command: ["clojure", "-A:dev:test", "-i", "integration"]

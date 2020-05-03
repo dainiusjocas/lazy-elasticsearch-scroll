@@ -3,7 +3,7 @@
     [clojure.string :as string]
     [jsonista.core :as json]
     [org.httpkit.client :as http]
-    [scroll :as scroll])
+    [scroll.request :as scroll])
   (:import (java.util UUID)))
 
 (defn index-exists? [es-host index-name]
@@ -41,7 +41,10 @@
       :client  @scroll/client
       :url     (format "%s/%s" es-host index-name)
       :headers {"Content-Type" "application/json"}
-      :body    (json/write-value-as-string {})}
+      :body    (json/write-value-as-string {:settings
+                                            {:index
+                                             {:number_of_shards 1
+                                              :number_of_replicas 0}}})}
      (fn [resp]
        (json/read-value (:body resp)
                         (json/object-mapper {:decode-key-fn true})))))
