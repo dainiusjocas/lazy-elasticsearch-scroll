@@ -30,7 +30,7 @@
                        true (update :opts (fn [opts] (merge request/default-exponential-backoff-params opts)))
                        (not (true? (get-in scroll-request [:opts :preserve-aggs?]))) (dissoc-aggs))]
     (case scroll-strategy
-      :scrolling (scrolling/fetch params)
+      :scroll-api (scrolling/fetch params)
       :search-after (search-after/fetch params)
       (scrolling/fetch params))))
 
