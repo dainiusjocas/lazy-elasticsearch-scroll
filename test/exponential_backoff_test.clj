@@ -4,7 +4,7 @@
             [scroll :as scroll]
             [utils :as utils]))
 
-(deftest ^:integration exponential-back-off-fail
+(deftest ^:integration exponential-backoff-fail
   (testing "if batch size is equal 0 then empty list of records should be returned with an error in the log"
     (let [es-host (or (System/getenv "ES_HOST") "http://localhost:9200")
           index-name "non-existing-index"
