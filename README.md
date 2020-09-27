@@ -26,13 +26,13 @@ The purpose of the library is to have an interface to consume **all** or some pa
 
 The library is uploaded to [Clojars](https://clojars.org/lt.jocas/lazy-elasticsearch-scroll), so you can just: 
 ```clojure
-{:deps {lt.jocas/lazy-elasticsearch-scroll {:mvn/version "1.0.13"}}}
+{:deps {lt.jocas/lazy-elasticsearch-scroll {:mvn/version "1.0.14"}}}
 ```
 
 If you want to use the code straight from Github then:
 ```clojure
 {:deps {lt.jocas/lazy-elasticsearch-scroll {:git/url "https://github.com/dainiusjocas/lazy-elasticsearch-scroll.git"
-                                            :sha "c8e1bfc4564af51085db1e50b3427236c2f433c0"}}}
+                                            :sha "bbc7ad54c96eb9052d4f3c0fb074f316d367d4a9"}}}
 ```
 
 ## Quickstart
