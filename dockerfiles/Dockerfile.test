@@ -5,6 +5,6 @@ RUN mkdir /root/.gitlibs
 WORKDIR /usr/src/app
 COPY deps.edn /usr/src/core/
 
-RUN clojure -A:test || true
+RUN clojure -A:dev:test || true
 
 COPY . /usr/src/app

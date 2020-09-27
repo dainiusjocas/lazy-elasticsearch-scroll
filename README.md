@@ -14,7 +14,7 @@ The scroll API is the default strategy.
 
 ## Use Cases
 
-The purpose of the library is to have an interface the consume **all** or some part the data from Elasticsearch. Why would you need to do that:
+The purpose of the library is to have an interface to consume **all** or some part the data from Elasticsearch. Why would you need to do that:
 
 - You need more documents than `index.max_result_window`;
 - One-off data transfer between Elasticsearch clusters (e.g. production -> staging);
@@ -145,9 +145,8 @@ The basic authorization is supported via environment variables:
 
 ## Supported Elasticsearch versions
 
-- 7.6.x
+- 7.9.x
 - 6.8.x
-- 5.6.X
 
 ## Development
 
@@ -156,7 +155,7 @@ and Kibana on exposed ports `9200` and `5601` respectively.
 
 To run development environment with a specific ELK version:
 ```shell script
-(export ES_VERSION=6.8.8 && make run-dev-env)
+ES_VERSION=6.8.12 make run-dev-env
 ```
 
 Run integration tests locally `make run-integration-tests`. This will start a `docker-compose` in which the integration
@@ -165,7 +164,7 @@ tests will be run.
 To run integration tests with a specific ELK version:
 
 ```shell script
-(export ES_VERSION=6.8.8 && make run-integration-tests)
+ES_VERSION=6.8.8 make run-integration-tests
 ```
 
 ## License

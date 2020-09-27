@@ -25,7 +25,7 @@ jobs:
       - name: Install clojure tools-deps
         uses: DeLaGuardo/setup-clojure@master
         with:
-          tools-deps: 1.10.1.469
+          tools-deps: 1.10.1.697
 
       - name: Unit Tests
         run: clojure -A:dev:test -e integration
@@ -43,8 +43,8 @@ jobs:
         # set N-1 indexes for parallel jobs
         # When you run 2 parallel jobs then first job will have index 0, the second job will have index 1 etc
         ci_node_index: [0]
-        java: ["1.8", "11", "14"]
-        elasticsearch: ["elasticsearch:5.6.16", "elasticsearch:6.8.8", "elasticsearch:7.6.2"]
+        java: ["1.8", "11", "14", "15"]
+        elasticsearch: ["elasticsearch:6.8.12", "elasticsearch:7.9.1"]
     services:
       elasticsearch:
         image: ${{ matrix.elasticsearch }}
@@ -69,7 +69,7 @@ jobs:
       - name: Install clojure tools-deps
         uses: DeLaGuardo/setup-clojure@master
         with:
-          tools-deps: 1.10.1.469
+          tools-deps: 1.10.1.697
 
       - name: Integration Tests
         env:

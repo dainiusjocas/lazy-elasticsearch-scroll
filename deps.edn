@@ -1,22 +1,21 @@
 {:paths
  ["src"]
  :deps
- {org.clojure/clojure       {:mvn/version "1.10.2-alpha1"}
-  http-kit                  {:mvn/version "2.4.0-alpha6"}
-  metosin/jsonista          {:mvn/version "0.2.5"}
-  org.clojure/tools.logging {:mvn/version "1.0.0"}}
+ {org.clojure/clojure       {:mvn/version "1.10.2-alpha2"}
+  http-kit                  {:mvn/version "2.5.0"}
+  metosin/jsonista          {:mvn/version "0.2.7"}
+  org.clojure/tools.logging {:mvn/version "1.1.0"}}
  :aliases
  {:dev
   {:extra-paths ["test" "test/resources"]
-   :extra-deps  {org.clojure/tools.deps.alpha
-                                                {:git/url    "https://github.com/clojure/tools.deps.alpha.git"
+   :extra-deps  {org.clojure/tools.deps.alpha   {:git/url    "https://github.com/clojure/tools.deps.alpha.git"
                                                  :sha        "f6c080bd0049211021ea59e516d1785b08302515"
                                                  :exclusions [org.slf4j/slf4j-log4j12 org.slf4j/slf4j-api org.slf4j/slf4j-nop]}
-                 criterium                      {:mvn/version "0.4.5"}
+                 criterium                      {:mvn/version "0.4.6"}
                  ch.qos.logback/logback-core    {:mvn/version "1.2.3"}
                  ch.qos.logback/logback-classic {:mvn/version "1.2.3"}}}
   :test
   {:extra-paths ["test" "test/resources"]
-   :extra-deps  {com.cognitect/test-runner      {:git/url "https://github.com/cognitect-labs/test-runner.git"
-                                                 :sha     "f7ef16dc3b8332b0d77bc0274578ad5270fbfedd"}}
+   :extra-deps  {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
+                                            :sha     "6ec7f8eef509cd14d831e8cc16e856b31327a862"}}
    :main-opts   ["-m" "cognitect.test-runner"]}}}
