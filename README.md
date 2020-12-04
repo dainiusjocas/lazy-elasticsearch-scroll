@@ -172,4 +172,4 @@ ES_VERSION=6.8.8 make run-integration-tests
 
 Copyright &copy; 2020 [Dainius Jocas](https://www.jocas.lt).
 
-Distributed under the The Apache License, Version 2.0.
+Distributed under The Apache License, Version 2.0.
