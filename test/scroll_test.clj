@@ -108,6 +108,13 @@
                  (scroll/hits
                    {:es-host    es-host
                     :index-name index-name}))))
+        (is (= number-of-docs
+               (count
+                 (scroll/hits
+                   {:es-host    es-host
+                    :index-name index-name
+                    :opts {:cleanup? true}}))))
+
 
         (is (<= number-of-docs (count (scroll/hits {:es-host es-host}))))))
 
