@@ -5,20 +5,21 @@
 [![Clojars Project](https://img.shields.io/clojars/v/lt.jocas/lazy-elasticsearch-scroll.svg)](https://clojars.org/lt.jocas/lazy-elasticsearch-scroll)
 [![cljdoc badge](https://cljdoc.org/badge/lt.jocas/lazy-elasticsearch-scroll)](https://cljdoc.org/d/lt.jocas/lazy-elasticsearch-scroll/CURRENT)
 
-Clojure library to get the data from Elasticsearch as a lazy sequence. Following strategies are supported:
+A Clojure library to get the data from Elasticsearch as a lazy sequence. Following strategies are supported:
 - [Scroll API](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-body.html#request-body-search-scroll)
 - [`search_after`](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-body.html#request-body-search-search-after)
+- `search_after` with [PIT](https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html#search-after) 
 - TODO: sliced scroll
 
 The scroll API is the default strategy.
 
 ## Use Cases
 
-The purpose of the library is to have an interface to consume **all** or some part the data from Elasticsearch. Why would you need to do that:
-
-- You need more documents than `index.max_result_window`;
+The purpose of the library is to have an interface to consume **all** or some part the data from Elasticsearch. Why would you need to do that?
+In general, when you need more documents than `index.max_result_window`. In particular:
+- When you're interested in top-k hits when k > 10000, in particular (e.g. query replay to analyze docs that didn't make it to the top-k);
 - One-off data transfer between Elasticsearch clusters (e.g. production -> staging);
-- One-off query replay from Elasticsearch logs cluster with slow queries back to the production Elasticsearch cluster;
+- One-off query replay from an Elasticsearch query logs cluster with queries back to the production Elasticsearch cluster;
 - If your enriched documents goes directly to the production Elasticsearch, and you want to play with the enriched data on your laptop;
 - etc...
 
@@ -171,4 +172,4 @@ ES_VERSION=6.8.8 make run-integration-tests
 
 Copyright &copy; 2020 [Dainius Jocas](https://www.jocas.lt).
 
-Distributed under the The Apache License, Version 2.0.
+Distributed under The Apache License, Version 2.0.

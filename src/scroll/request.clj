@@ -46,15 +46,16 @@
   {"Content-Type"  "application/json"
    "Authorization" (str "Basic " (authorization-token))})
 
-(defn execute-request [{:keys [url body opts]}]
+(defn execute-request [{:keys [url body opts method]}]
   (exponential-backoff
     (fn []
-      (let [{:keys [status body error]} @(http/request
-                                           {:method  :get
-                                            :client  @client
-                                            :url     url
-                                            :headers (prepare-headers opts)
-                                            :body    (json/write-value-as-string body)})]
+      (let [{:keys [status body error]}
+            @(http/request
+               (cond-> {:method  (or method :get)
+                        :client  @client
+                        :url     url
+                        :headers (prepare-headers opts)}
+                       (not (nil? body)) (assoc :body (json/write-value-as-string body))))]
         (when error (throw (Exception. (str error))))
         (let [{:keys [error] :as decoded-body}
               (json/read-value body (json/object-mapper
@@ -64,4 +65,4 @@
           (if (<= 200 status 299)
             decoded-body
             (throw (Exception. "Response exception"))))))
-    opts))
+    (or opts default-exponential-backoff-params)))

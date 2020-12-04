@@ -20,6 +20,7 @@
   - opts: supported options:
   - - keep-context: specifies how log to maintain scroll state, default `30s`
   - - keywordize?: should the JSON keys be converted to Clojure keys, default true
+  - - cleanup?: should the scroll be deleted after consuming all the documents, default false
   - - size: how many records should be fetched from Elasticsearch in one network trip, default 1000"
   [{:keys [es-host] :as scroll-request}]
   (assert (string? es-host) (format "Invalid Elasticsearch host `%s`" es-host))

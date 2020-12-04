@@ -3,6 +3,7 @@
     [clojure.test :refer [deftest is testing]]
     [clojure.tools.logging :as log]
     [scroll :as scroll]
+    [scroll.scrolling :as scrolling]
     [utils :as utils]))
 
 (deftest ^:integration search-after-strategy
@@ -107,6 +108,13 @@
                  (scroll/hits
                    {:es-host    es-host
                     :index-name index-name}))))
+        (is (= number-of-docs
+               (count
+                 (scroll/hits
+                   {:es-host    es-host
+                    :index-name index-name
+                    :opts {:cleanup? true}}))))
+
 
         (is (<= number-of-docs (count (scroll/hits {:es-host es-host}))))))
 
@@ -176,7 +184,7 @@
         (is (= 5 (count (take 5 records))))
         ; Auto scroll context deletion is an async op, it might take up to a minute.
         ; By deleting all scroll contexts we simulate expiration, instead of sleeping.
-        (utils/delete-all-scroll-contexts es-host)
+        (scrolling/delete-scroll-context es-host)
         (is (= 5 (count records)))))
 
     (testing "various incomplete inputs"
