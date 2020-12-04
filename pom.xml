@@ -25,7 +25,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.10.2-alpha2</version>
+      <version>1.10.2-alpha4</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
