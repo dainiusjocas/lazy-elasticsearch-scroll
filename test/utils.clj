@@ -3,7 +3,6 @@
     [clojure.string :as string]
     [jsonista.core :as json]
     [org.httpkit.client :as http]
-    [scroll.request :as scroll]
     [scroll.request :as request])
   (:import (java.util UUID)))
 
@@ -16,7 +15,7 @@
   (if (index-exists? es-host index-name)
     @(http/request
        {:method  :delete
-        :client  @scroll/client
+        :client  @request/client
         :url     (format "%s/%s" es-host index-name)
         :headers {"Content-Type" "application/json"}}
        (fn [resp]
@@ -27,7 +26,7 @@
 (defn create-index [es-host index-name]
   @(http/request
      {:method  :put
-      :client  @scroll/client
+      :client  @request/client
       :url     (format "%s/%s" es-host index-name)
       :headers {"Content-Type" "application/json"}
       :body    (json/write-value-as-string {:settings
@@ -41,7 +40,7 @@
 (defn refresh-index [dest-host dest-index]
   @(http/request
      {:method  :get
-      :client  @scroll/client
+      :client  @request/client
       :url     (format "%s/%s/_refresh" dest-host dest-index)
       :headers {"Content-Type" "application/json"}}
      (fn [resp]
@@ -49,7 +48,7 @@
                         (json/object-mapper {:decode-key-fn true})))))
 
 (defn es-version [es-host]
-  @(org.httpkit.client/request
+  @(http/request
      {:method :get
       :url    es-host}
      #(-> (:body %)
@@ -85,6 +84,7 @@
   @(http/request
      {:url       (format "%s/_bulk" es-host)
       :method    :post
+      :client    @request/client
       :headers   {"Content-Type" "application/x-ndjson"}
       :body      body
       :keepalive 30000}

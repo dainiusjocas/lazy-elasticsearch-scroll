@@ -66,5 +66,5 @@
             (when error (throw (Exception. (str error))))
             (if (<= 200 status 299)
               decoded-body
-              (throw (Exception. (format "Response exception" (str decoded-body)))))))))
+              (throw (Exception. (format "Response exception: %s" (str decoded-body)))))))))
     (or opts default-exponential-backoff-params)))
