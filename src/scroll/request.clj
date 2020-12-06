@@ -36,18 +36,22 @@
 
 (def client (delay (http/make-client {:ssl-configurer sni-configure})))
 
+(def default-headers {"Content-Type"  "application/json"})
+
 (defn authorization-token []
-  (.encodeToString (Base64/getEncoder)
-                   (.getBytes (str (System/getenv "ELASTIC_USERNAME")
-                                   ":"
-                                   (System/getenv "ELASTIC_PASSWORD")))))
-(defn prepare-headers [_]
+  (let [username (System/getenv "ELASTIC_USERNAME")
+        password (System/getenv "ELASTIC_PASSWORD")]
+    (when (and username password)
+      (.encodeToString (Base64/getEncoder) (.getBytes (str username ":" password))))))
+
+(defn prepare-headers [headers _]
   ; basic authorization
   ; https://www.elastic.co/guide/en/elasticsearch/reference/current/http-clients.html
-  {"Content-Type"  "application/json"
-   "Authorization" (str "Basic " (authorization-token))})
+  (if-let [auth-token (authorization-token)]
+    (assoc headers "Authorization" (str "Basic " auth-token))
+    headers))
 
-(defn execute-request [{:keys [url body opts method]}]
+(defn execute-request [{:keys [url body opts method headers]}]
   (exponential-backoff
     (fn []
       (let [{:keys [status body error]}
@@ -55,7 +59,7 @@
                (cond-> {:method  (or method :get)
                         :client  @client
                         :url     url
-                        :headers (prepare-headers opts)}
+                        :headers (prepare-headers (or headers default-headers) opts)}
                        (not (nil? body)) (assoc :body (json/write-value-as-string body))))]
         (when error (throw (Exception. (str error))))
         (when-not (str/blank? body)
