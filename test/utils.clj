@@ -3,15 +3,14 @@
     [clojure.string :as string]
     [jsonista.core :as json]
     [org.httpkit.client :as http]
-    [scroll.request :as scroll])
+    [scroll.request :as scroll]
+    [scroll.request :as request])
   (:import (java.util UUID)))
 
 (defn index-exists? [es-host index-name]
-  @(http/request
-     {:method :head
-      :client @scroll/client
-      :url    (format "%s/%s" es-host index-name)}
-     (fn [resp] (not (= 404 (:status resp))))))
+  (not (= 404 (:status (request/execute-request
+                           {:method :head
+                            :url (format "%s/%s" es-host index-name)})))))
 
 (defn delete-index [es-host index-name]
   (if (index-exists? es-host index-name)

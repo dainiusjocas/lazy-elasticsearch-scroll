@@ -73,4 +73,5 @@
                             :latest-pit-id latest-pit-id}}))
       (do
         (log/debugf "PIT terminated with: %s"
-                    (pit/terminate es-host {:id @latest-pit-id}))))))
+                    (pit/terminate es-host {:id @latest-pit-id}))
+        nil))))

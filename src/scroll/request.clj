@@ -1,5 +1,6 @@
 (ns scroll.request
   (:require [clojure.tools.logging :as log]
+            [clojure.string :as str]
             [org.httpkit.client :as http]
             [jsonista.core :as json])
   (:import (javax.net.ssl SSLEngine SSLParameters SNIHostName)
@@ -57,12 +58,13 @@
                         :headers (prepare-headers opts)}
                        (not (nil? body)) (assoc :body (json/write-value-as-string body))))]
         (when error (throw (Exception. (str error))))
-        (let [{:keys [error] :as decoded-body}
-              (json/read-value body (json/object-mapper
-                                      {:decode-key-fn (get opts :keywordize?)}))]
+        (when-not (str/blank? body)
+          (let [{:keys [error] :as decoded-body}
+                (json/read-value body (json/object-mapper
+                                        {:decode-key-fn (get opts :keywordize?)}))]
 
-          (when error (throw (Exception. (str error))))
-          (if (<= 200 status 299)
-            decoded-body
-            (throw (Exception. "Response exception"))))))
+            (when error (throw (Exception. (str error))))
+            (if (<= 200 status 299)
+              decoded-body
+              (throw (Exception. (format "Response exception" (str decoded-body)))))))))
     (or opts default-exponential-backoff-params)))
