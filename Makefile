@@ -18,3 +18,7 @@ release:
 	rm pom.xml.releaseBackup || true
 	clojure -Spom
 	mvn release:prepare
+
+.PHONY: lint
+lint:
+	clojure -M:clj-kondo
