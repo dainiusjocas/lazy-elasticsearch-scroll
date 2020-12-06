@@ -2,7 +2,8 @@
   (:require [clojure.tools.logging :as log]
             [scroll.request :as request]
             [scroll.search-after :as search-after]
-            [scroll.scrolling :as scrolling]))
+            [scroll.scrolling :as scrolling]
+            [scroll.pit :as pit]))
 
 (defn dissoc-aggs [scroll-request]
   (-> scroll-request
@@ -52,4 +53,20 @@
      :opts       {:keep-context "30s"
                   :keywordize?  true
                   :size         1000
-                  :preserve-aggs? true}}))
+                  :preserve-aggs? true}})
+
+  (let [opts {:keep-alive "30s"}
+        es-host "http://localhost:9200"
+        index-name ".kibana"
+        pit (pit/init es-host index-name opts)
+        pit-with-keep-alive (assoc pit :keep_alive (or (:keep-alive opts) "30s"))]
+    (lazy-cat
+      (take 1
+            (hits
+              {:es-host    es-host
+               :index-name index-name
+               :query      (assoc {:query {:match_all {}}} :pit pit-with-keep-alive)
+               :opts       {:strategy    :search-after
+                            :keywordize? true
+                            :size        1}}))
+      (do (log/debugf "PIT terminated with: %s" (pit/terminate es-host pit))))))

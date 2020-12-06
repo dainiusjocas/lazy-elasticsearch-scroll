@@ -9,26 +9,29 @@
 (defn remove-from-param [query]
   (dissoc query :from))
 
+(defn prepare-url [es-host index-name query]
+  (if (:pit query)
+    (format "%s/_search" es-host)
+    (format "%s/%s/_search" es-host (or index-name "*"))))
+
+(defn prepare-query-body [query opts]
+  (remove-from-param
+    (batch/set-batch-size
+      (if (:sort query)
+        (or query default-query)
+        (merge query default-query))
+      opts)))
+
 (defn start [es-host index-name query opts]
   (request/execute-request
-    {:url  (format "%s/%s/_search" es-host (or index-name "*"))
-     :body (remove-from-param
-             (batch/set-batch-size
-               (if (:sort query)
-                 (or query default-query)
-                 (assoc query :sort [:_doc]))
-               opts))
+    {:url  (prepare-url es-host index-name query)
+     :body (prepare-query-body query opts)
      :opts opts}))
 
-(defn continue [es-host index-name query search-after opts]
+(defn continue [es-host index-name query search-after-clause opts]
   (request/execute-request
-    {:url  (format "%s/%s/_search" es-host (or index-name "*"))
-     :body (remove-from-param
-             (batch/set-batch-size
-               (if (:sort query)
-                 (assoc (or query default-query) :search_after search-after)
-                 (assoc query :sort [:_doc]
-                              :search_after search-after)) opts))
+    {:url  (prepare-url es-host index-name query)
+     :body (assoc (prepare-query-body query opts) :search_after search-after-clause)
      :opts opts}))
 
 (defn extract-search-after [batch keywordize?]
@@ -37,8 +40,8 @@
         last
         (get :sort))
     (-> (get-in batch ["hits" "hits"])
-         last
-         (get "sort"))))
+        last
+        (get "sort"))))
 
 (defn fetch [{:keys [es-host index-name query search-after opts] :as req}]
   (try
