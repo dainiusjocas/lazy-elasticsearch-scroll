@@ -54,7 +54,7 @@
 (defn execute-request [{:keys [url body opts method headers]}]
   (exponential-backoff
     (fn []
-      (let [{:keys [status body error]}
+      (let [{:keys [status body error] :as resp}
             @(http/request
                (cond-> {:method  (or method :get)
                         :client  @client
@@ -70,5 +70,5 @@
             (when error (throw (Exception. (str error))))
             (if (<= 200 status 299)
               decoded-body
-              (throw (Exception. (format "Response exception: %s" (str decoded-body)))))))))
+              (throw (Exception. (format "Response exception: %s" resp))))))))
     (or opts default-exponential-backoff-params)))

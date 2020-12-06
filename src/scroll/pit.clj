@@ -16,12 +16,16 @@
   ([es-host pit] (terminate es-host pit {}))
   ([es-host pit opts]
    (log/debugf "Terminating PIT: %s" pit)
-   (request/execute-request
-     {:method :delete
-      :url    (format "%s/_pit" es-host)
-      :body   pit
-      :opts   (merge request/default-exponential-backoff-params
-                     (assoc opts :keywordize? true))})))
+   (try
+     (request/execute-request
+       {:method :delete
+        :url    (format "%s/_pit" es-host)
+        :body   pit
+        :opts   (merge request/default-exponential-backoff-params
+                       (assoc opts :keywordize? true
+                                   :max 1000))})
+     (catch Exception _
+       {:succeeded false}))))
 
 (comment
   (scroll.pit/init "http://localhost:9200" ".kibana")

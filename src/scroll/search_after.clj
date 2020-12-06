@@ -45,7 +45,7 @@
 (defn extract-pit-id [batch keywordize?]
   (get batch (if keywordize? :pit_id "pit_id")))
 
-(defn fetch [{:keys [es-host index-name query search-after fetched total-count opts] :as req}]
+(defn fetch [{:keys [es-host index-name query search-after fetched opts] :as req}]
   (try
     (let [batch (if search-after
                   (continue es-host index-name query search-after opts)
@@ -57,7 +57,7 @@
                                           (get-in batch ["hits" "total" "value"]))))]
       (log/debugf "Fetching a batch from '%s' out of '%s' took: %s ms"
                   (or fetched 0)
-                  (or total-count (get req :total-count))
+                  (get req :total-count)
                   (or (get batch :took) (get batch "took")))
       (when (:latest-pit-id opts)
         (reset! (:latest-pit-id opts) (extract-pit-id batch (get opts :keywordize?))))

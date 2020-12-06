@@ -1,5 +1,5 @@
 (ns scroll.pit-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is testing]]
             [clojure.tools.logging :as log]
             [scroll.pit :as pit]
             [utils :as utils]))
@@ -10,4 +10,7 @@
     (log/infof "Index recreated %s" (utils/recreate-index es-host index-name))
     (let [pit-resp (pit/init es-host index-name)]
       (is (string? (:id pit-resp)))
-      (is (true? (:succeeded (pit/terminate es-host pit-resp)))))))
+      (is (true? (:succeeded (pit/terminate es-host pit-resp))))
+
+      (testing "Terminating PIT second time is not successful"
+        (is (false? (:succeeded (pit/terminate es-host pit-resp))))))))
