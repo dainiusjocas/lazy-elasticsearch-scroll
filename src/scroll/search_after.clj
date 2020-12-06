@@ -2,7 +2,8 @@
   (:require [clojure.tools.logging :as log]
             [scroll.batch :as batch]
             [scroll.hits :as hits]
-            [scroll.request :as request]))
+            [scroll.request :as request])
+  (:import (clojure.lang IAtom)))
 
 (def default-query {:sort ["_doc"]})
 
@@ -59,7 +60,7 @@
                   (or fetched 0)
                   (get req :total-count)
                   (or (get batch :took) (get batch "took")))
-      (when (:latest-pit-id opts)
+      (when (instance? IAtom (:latest-pit-id opts))
         (reset! (:latest-pit-id opts) (extract-pit-id batch (get opts :keywordize?))))
       (when-let [current-hits (seq (hits/extract-hits batch (get opts :keywordize?)))]
         (lazy-cat current-hits

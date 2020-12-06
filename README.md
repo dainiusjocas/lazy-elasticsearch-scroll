@@ -137,6 +137,45 @@ However `search-after` [is not a silver bullet](https://github.com/elastic/elast
     - sorting on `_doc` is unpredictable because _doc is unique per shard;
 - how to parallelize fetching?
 
+## `search-after` with PIT
+
+Combining `search-after` strategy with PIT (Point-in-Time) is the recommended way to implement [deep paging](https://www.elastic.co/guide/en/elasticsearch/reference/current/paginate-search-results.html#scroll-search-results).
+
+Things to remember before using the PIT:
+- It is available only since Elasticsearch 7.10.0
+- It is a [X-Pack feature](https://www.elastic.co/guide/en/elasticsearch/reference/master/point-in-time-api.html)
+- The PIT session should be closed when no longer needed
+
+Since there is no obvious way to know when to terminate the PIT when hits are exposed as a lazy sequence, temination is the responsibility of the caller. For example, when a fixed number of hits is needed the PIT session can be handled similar to this:
+
+```clojure
+(let [opts {:keep-alive "30s"}
+      es-host "http://localhost:9200"
+      index-name ".kibana"
+      pit (pit/init es-host index-name opts)
+      ; mutable state is needed because PIT ID might change
+      latest-pit-id (atom (:id pit))
+      pit-with-keep-alive (assoc pit :keep_alive (or (:keep-alive opts) "30s"))]
+  (take 10
+    (lazy-cat
+      (scroll/hits
+        {:es-host    es-host
+         :index-name index-name
+         :query      (assoc {:query {:match_all {}}} :pit pit-with-keep-alive)
+         :opts       {:strategy      :search-after
+                      ; expects an atom
+                      ; the contents of an atom will be a string with PIT ID
+                      :latest-pit-id latest-pit-id}})
+      ; last element of the lazy-sequence is the output of `do` macro
+      ; and inside the `do` we terminate the PIT and return nil
+      ; that last nil will not be in the sequence because `lazy-cat` terminates if nil
+      (do
+        (log/debugf "PIT terminated with: %s"
+                    (pit/terminate es-host {:id @latest-pit-id}))
+        nil))))
+```
+Yes, It is a horrible hack, but it gets the job done while exposing the Elasticsearch as a lazy sequence of hits.
+
 ## User Authorization
 
 The basic authorization is supported via environment variables:
@@ -146,7 +185,7 @@ The basic authorization is supported via environment variables:
 
 ## Supported Elasticsearch versions
 
-- 7.9.x
+- 7.10.x
 - 6.8.x
 
 ## Development
