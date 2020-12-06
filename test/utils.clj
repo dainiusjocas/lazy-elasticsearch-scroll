@@ -37,6 +37,10 @@
        (json/read-value (:body resp)
                         (json/object-mapper {:decode-key-fn true})))))
 
+(defn recreate-index [es-host index-name]
+  (delete-index es-host index-name)
+  (create-index es-host index-name))
+
 (defn refresh-index [dest-host dest-index]
   @(http/request
      {:method  :get
