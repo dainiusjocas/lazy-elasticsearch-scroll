@@ -9,7 +9,7 @@
 (deftest ^:integration search-after-strategy
   (let [es-host (or (System/getenv "ES_HOST") "http://localhost:9200")
         index-name "scroll-test-index"
-        number-of-docs (+ 10 (rand-int 0))
+        number-of-docs (+ 10 (rand-int 10))
         records (map (fn [x] {:_id x
                               :_source {:value x}}) (range number-of-docs))]
     (log/infof "Deleted index='%s' at '%s': %s"

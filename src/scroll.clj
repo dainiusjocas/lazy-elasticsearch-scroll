@@ -61,17 +61,17 @@
         pit (pit/init es-host index-name opts)
         latest-pit-id (atom (:id pit))
         pit-with-keep-alive (assoc pit :keep_alive (or (:keep-alive opts) "30s"))]
-    (lazy-cat
-      (take 1
-            (hits
-              {:es-host    es-host
-               :index-name index-name
-               :query      (assoc {:query {:match_all {}}} :pit pit-with-keep-alive)
-               :opts       {:strategy      :search-after
-                            :keywordize?   true
-                            :size          1
-                            :latest-pit-id latest-pit-id}}))
-      (do
-        (log/debugf "PIT terminated with: %s"
-                    (pit/terminate es-host {:id @latest-pit-id}))
-        nil))))
+    (last
+      (lazy-cat
+        (hits
+          {:es-host    es-host
+           :index-name index-name
+           :query      (assoc {:query {:match_all {}}} :pit pit-with-keep-alive)
+           :opts       {:strategy      :search-after
+                        :keywordize?   true
+                        :size          10
+                        :latest-pit-id latest-pit-id}})
+        (do
+          (log/debugf "PIT terminated with: %s"
+                      (pit/terminate es-host {:id @latest-pit-id}))
+          nil)))))
