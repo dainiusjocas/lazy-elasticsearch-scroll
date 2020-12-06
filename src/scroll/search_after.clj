@@ -43,12 +43,17 @@
         last
         (get "sort"))))
 
+(defn extract-pit-id [batch keywordize?]
+  (get batch (if keywordize? :pit_id "pit_id")))
+
 (defn fetch [{:keys [es-host index-name query search-after opts] :as req}]
   (try
     (let [batch (if search-after
                   (continue es-host index-name query search-after opts)
                   (start es-host index-name query opts))]
       (log/debugf "Fetching a batch took: %s ms" (or (get batch :took) (get batch "took")))
+      (when (:latest-pit-id opts)
+        (reset! (:latest-pit-id opts) (extract-pit-id batch (get opts :keywordize?))))
       (when-let [current-hits (seq (hits/extract-hits batch (get opts :keywordize?)))]
         (lazy-cat current-hits
                   (when-let [sa (extract-search-after batch (get opts :keywordize?))]

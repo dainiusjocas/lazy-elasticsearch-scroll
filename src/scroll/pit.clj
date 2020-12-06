@@ -1,5 +1,6 @@
 (ns scroll.pit
-  (:require [org.httpkit.client :as http]
+  (:require [clojure.tools.logging :as log]
+            [org.httpkit.client :as http]
             [jsonista.core :as json]))
 
 (def mapper (json/object-mapper {:decode-key-fn true}))
@@ -14,6 +15,7 @@
       (fn [resp] (json/read-value (:body resp) mapper)))))
 
 (defn terminate [es-host pit]
+  (log/debugf "Terminating PIT: %s" pit)
   @(http/request
      {:method :delete
       :headers {"Content-Type" "application/json"}

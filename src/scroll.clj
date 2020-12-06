@@ -57,8 +57,9 @@
 
   (let [opts {:keep-alive "30s"}
         es-host "http://localhost:9200"
-        index-name ".kibana"
+        index-name "scroll-test-index"
         pit (pit/init es-host index-name opts)
+        latest-pit-id (atom (:id pit))
         pit-with-keep-alive (assoc pit :keep_alive (or (:keep-alive opts) "30s"))]
     (lazy-cat
       (take 1
@@ -66,7 +67,10 @@
               {:es-host    es-host
                :index-name index-name
                :query      (assoc {:query {:match_all {}}} :pit pit-with-keep-alive)
-               :opts       {:strategy    :search-after
-                            :keywordize? true
-                            :size        1}}))
-      (do (log/debugf "PIT terminated with: %s" (pit/terminate es-host pit))))))
+               :opts       {:strategy      :search-after
+                            :keywordize?   true
+                            :size          1
+                            :latest-pit-id latest-pit-id}}))
+      (do
+        (log/debugf "PIT terminated with: %s"
+                    (pit/terminate es-host {:id @latest-pit-id}))))))
