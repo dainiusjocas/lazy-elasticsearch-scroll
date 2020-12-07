@@ -43,8 +43,8 @@ jobs:
         # set N-1 indexes for parallel jobs
         # When you run 2 parallel jobs then first job will have index 0, the second job will have index 1 etc
         ci_node_index: [0]
-        java: ["1.8", "11", "14", "15"]
-        elasticsearch: ["elasticsearch:6.8.12", "elasticsearch:7.9.1"]
+        java: ["1.8", "11", "14"]
+        elasticsearch: ["elasticsearch:6.8.12", "docker.elastic.co/elasticsearch/elasticsearch:7.10.0"]
     services:
       elasticsearch:
         image: ${{ matrix.elasticsearch }}

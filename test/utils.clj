@@ -3,21 +3,20 @@
     [clojure.string :as string]
     [jsonista.core :as json]
     [org.httpkit.client :as http]
-    [scroll.request :as scroll])
+    [scroll.request :as request]
+    [clojure.string :as s])
   (:import (java.util UUID)))
 
 (defn index-exists? [es-host index-name]
-  @(http/request
-     {:method :head
-      :client @scroll/client
-      :url    (format "%s/%s" es-host index-name)}
-     (fn [resp] (not (= 404 (:status resp))))))
+  (not (= 404 (:status (request/execute-request
+                         {:method :head
+                          :url (format "%s/%s" es-host index-name)})))))
 
 (defn delete-index [es-host index-name]
   (if (index-exists? es-host index-name)
     @(http/request
        {:method  :delete
-        :client  @scroll/client
+        :client  @request/client
         :url     (format "%s/%s" es-host index-name)
         :headers {"Content-Type" "application/json"}}
        (fn [resp]
@@ -28,7 +27,7 @@
 (defn create-index [es-host index-name]
   @(http/request
      {:method  :put
-      :client  @scroll/client
+      :client  @request/client
       :url     (format "%s/%s" es-host index-name)
       :headers {"Content-Type" "application/json"}
       :body    (json/write-value-as-string {:settings
@@ -39,10 +38,14 @@
        (json/read-value (:body resp)
                         (json/object-mapper {:decode-key-fn true})))))
 
+(defn recreate-index [es-host index-name]
+  (delete-index es-host index-name)
+  (create-index es-host index-name))
+
 (defn refresh-index [dest-host dest-index]
   @(http/request
      {:method  :get
-      :client  @scroll/client
+      :client  @request/client
       :url     (format "%s/%s/_refresh" dest-host dest-index)
       :headers {"Content-Type" "application/json"}}
      (fn [resp]
@@ -50,7 +53,7 @@
                         (json/object-mapper {:decode-key-fn true})))))
 
 (defn es-version [es-host]
-  @(org.httpkit.client/request
+  @(http/request
      {:method :get
       :url    es-host}
      #(-> (:body %)
@@ -59,6 +62,22 @@
           :number
           (first)
           (str))))
+
+(defn version->semantic-version [version-str]
+  (zipmap [:major :minor :patch]
+          (map (fn [^String n] (try (Integer/parseInt n) (catch Exception _ n)))
+               (s/split version-str #"\."))))
+
+(defn semantic-es-version [es-host]
+  @(http/request
+     {:method :get
+      :url    es-host}
+     (fn [resp]
+       (-> (:body resp)
+           (json/read-value (json/object-mapper {:decode-key-fn true}))
+           :version
+           :number
+           version->semantic-version))))
 
 (defn update-op [es-version index-name id]
   (let [id (or id (UUID/randomUUID))]
@@ -86,6 +105,7 @@
   @(http/request
      {:url       (format "%s/_bulk" es-host)
       :method    :post
+      :client    @request/client
       :headers   {"Content-Type" "application/x-ndjson"}
       :body      body
       :keepalive 30000}

@@ -1,10 +1,10 @@
-FROM clojure:tools-deps-alpine
+FROM clojure:openjdk-14-tools-deps-1.10.1.727-slim-buster
 
 RUN mkdir /root/.gitlibs
 
 WORKDIR /usr/src/app
-COPY deps.edn /usr/src/core/
+COPY deps.edn /usr/src/app
 
-RUN clojure -A:dev:test || true
+RUN clojure -P -M:dev:test
 
 COPY . /usr/src/app
