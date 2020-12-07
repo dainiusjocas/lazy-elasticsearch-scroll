@@ -3,13 +3,14 @@
     [clojure.string :as string]
     [jsonista.core :as json]
     [org.httpkit.client :as http]
-    [scroll.request :as request])
+    [scroll.request :as request]
+    [clojure.string :as s])
   (:import (java.util UUID)))
 
 (defn index-exists? [es-host index-name]
   (not (= 404 (:status (request/execute-request
-                           {:method :head
-                            :url (format "%s/%s" es-host index-name)})))))
+                         {:method :head
+                          :url (format "%s/%s" es-host index-name)})))))
 
 (defn delete-index [es-host index-name]
   (if (index-exists? es-host index-name)
@@ -61,6 +62,22 @@
           :number
           (first)
           (str))))
+
+(defn version->semantic-version [version-str]
+  (zipmap [:major :minor :patch]
+          (map (fn [^String n] (try (Integer/parseInt n) (catch Exception _ n)))
+               (s/split version-str #"\."))))
+
+(defn semantic-es-version [es-host]
+  @(http/request
+     {:method :get
+      :url    es-host}
+     (fn [resp]
+       (-> (:body resp)
+           (json/read-value (json/object-mapper {:decode-key-fn true}))
+           :version
+           :number
+           version->semantic-version))))
 
 (defn update-op [es-version index-name id]
   (let [id (or id (UUID/randomUUID))]
