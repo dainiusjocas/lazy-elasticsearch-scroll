@@ -1,6 +1,12 @@
 name: clj-kondo linting
 
-on: [push]
+on:
+  push:
+    branches:
+      - '*'
+      - '!lazy-elasticsearch-scroll-*'
+    tags:
+      - '!lazy-elasticsearch-scroll-*'
 
 jobs:
   build:
