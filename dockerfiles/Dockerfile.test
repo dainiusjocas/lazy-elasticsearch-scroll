@@ -1,4 +1,4 @@
-FROM clojure:openjdk-14-tools-deps-1.10.1.727-slim-buster
+FROM clojure:openjdk-16-tools-deps-1.10.2.796-slim-buster
 
 RUN mkdir /root/.gitlibs
 
