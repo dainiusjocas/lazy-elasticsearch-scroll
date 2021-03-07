@@ -1,25 +1,26 @@
 {:paths
  ["src"]
  :deps
- {org.clojure/clojure       {:mvn/version "1.10.2-alpha4"}
-  http-kit/http-kit         {:mvn/version "2.5.0"}
-  metosin/jsonista          {:mvn/version "0.2.7"}
+ {org.clojure/clojure       {:mvn/version "1.10.3"}
+  http-kit/http-kit         {:mvn/version "2.5.3"}
+  metosin/jsonista          {:mvn/version "0.3.1"}
   org.clojure/tools.logging {:mvn/version "1.1.0"}}
  :aliases
  {:dev
   {:extra-paths ["test" "test/resources"]
-   :extra-deps  {org.clojure/tools.deps.alpha   {:git/url    "https://github.com/clojure/tools.deps.alpha.git"
-                                                 :sha        "f6c080bd0049211021ea59e516d1785b08302515"
-                                                 :exclusions [org.slf4j/slf4j-log4j12 org.slf4j/slf4j-api org.slf4j/slf4j-nop]}
+   :extra-deps  {org.clojure/tools.deps.alpha   {:mvn/version "0.10.889"
+                                                 :exclusions  [org.slf4j/slf4j-log4j12
+                                                               org.slf4j/slf4j-api
+                                                               org.slf4j/slf4j-nop]}
                  criterium/criterium            {:mvn/version "0.4.6"}
                  ch.qos.logback/logback-core    {:mvn/version "1.2.3"}
                  ch.qos.logback/logback-classic {:mvn/version "1.2.3"}}}
   :clj-kondo
   {:main-opts  ["-m" "clj-kondo.main --lint src test"]
-   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2020.11.07"}}
+   :extra-deps {clj-kondo/clj-kondo {:mvn/version "2021.03.03"}}
    :jvm-opts   ["-Dclojure.main.report=stderr"]}
   :test
   {:extra-paths ["test" "test/resources"]
    :extra-deps  {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
-                                            :sha     "6ec7f8eef509cd14d831e8cc16e856b31327a862"}}
+                                            :sha     "b6b3193fcc42659d7e46ecd1884a228993441182"}}
    :main-opts   ["-m" "cognitect.test-runner"]}}}
