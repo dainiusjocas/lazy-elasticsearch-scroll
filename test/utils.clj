@@ -3,8 +3,7 @@
     [clojure.string :as string]
     [jsonista.core :as json]
     [org.httpkit.client :as http]
-    [scroll.request :as request]
-    [clojure.string :as s])
+    [scroll.request :as request])
   (:import (java.util UUID)))
 
 (defn index-exists? [es-host index-name]
@@ -66,7 +65,7 @@
 (defn version->semantic-version [version-str]
   (zipmap [:major :minor :patch]
           (map (fn [^String n] (try (Integer/parseInt n) (catch Exception _ n)))
-               (s/split version-str #"\."))))
+               (string/split version-str #"\."))))
 
 (defn semantic-es-version [es-host]
   @(http/request
