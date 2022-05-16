@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-java@v3.3.0
         with:
           distribution: 'zulu'
-          java-version: 17
+          java-version: 17.0.3+7
 
       - name: Publish to Clojars
         run: mvn --batch-mode -s clojars-settings.xml deploy
